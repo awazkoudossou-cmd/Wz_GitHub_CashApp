@@ -1,0 +1,411 @@
+Nous poursuivons exactement le même projet.
+
+Ne jamais modifier les prompts précédents.
+
+Développer entièrement le Centre d'Exports Comptables.
+
+=========================================================
+OBJECTIF
+=========================================================
+
+Créer un véritable centre de gestion des exports.
+
+Le système ne doit jamais réaliser un export direct sans historisation.
+
+Chaque export doit être enregistré.
+
+=========================================================
+NOUVELLE ENTITE
+=========================================================
+
+AccountingExport
+
+Id
+
+ExportNumber
+
+BatchId
+
+ExportDate
+
+ExportedBy
+
+FileName
+
+FilePath
+
+NumberOfEntries
+
+GenerationType
+
+GenerationMode
+
+Status
+
+Remarks
+
+=========================================================
+ENUM
+=========================================================
+
+AccountingExportStatus
+
+GENERATED
+
+DOWNLOADED
+
+DELETED
+
+=========================================================
+WORKFLOW
+=========================================================
+
+Utilisateur
+
+↓
+
+Choisit
+
+Batch
+
+ou
+
+Filtres
+
+↓
+
+Prévisualisation
+
+↓
+
+Confirmation
+
+↓
+
+Création Excel
+
+↓
+
+Enregistrement Export
+
+↓
+
+Téléchargement
+
+↓
+
+Historisation
+
+=========================================================
+FILTRES
+=========================================================
+
+Permettre :
+
+Date début
+
+Date fin
+
+Journal
+
+Compte
+
+Caisse
+
+Catégorie
+
+Utilisateur
+
+Batch
+
+Etat
+
+Type génération
+
+Mode génération
+
+=========================================================
+PREVISUALISATION
+=========================================================
+
+Avant export
+
+Afficher :
+
+Nombre d'écritures
+
+Nombre de Batch
+
+Nombre de comptes
+
+Nombre de journaux
+
+Période
+
+Taille estimée
+
+=========================================================
+FORMAT EXCEL
+=========================================================
+
+Créer une feuille nommée :
+
+Brouillard Comptable
+
+Colonnes :
+
+Date saisie
+
+Date opération
+
+Code journal
+
+Référence
+
+Numéro de pièce
+
+Compte
+
+Libellé
+
+Débit
+
+Crédit
+
+Utilisateur
+
+Batch
+
+=========================================================
+MISE EN FORME
+=========================================================
+
+Créer automatiquement :
+
+Titre
+
+Date export
+
+Utilisateur
+
+Filtres utilisés
+
+Gel de la première ligne
+
+Largeur automatique
+
+Format Date
+
+Format Monétaire
+
+Totaux Débit
+
+Totaux Crédit
+
+Différence
+
+=========================================================
+VERIFICATION
+=========================================================
+
+Avant génération
+
+Vérifier :
+
+Débit = Crédit
+
+Si déséquilibre
+
+Interdire l'export.
+
+=========================================================
+NOM DU FICHIER
+=========================================================
+
+Créer automatiquement.
+
+Exemple
+
+ACCOUNTING_20260705_143522.xlsx
+
+ou
+
+ACCOUNTING_BATCH_ACC-20260705-0001.xlsx
+
+=========================================================
+CENTRE D'EXPORTS
+=========================================================
+
+Créer une page.
+
+Afficher :
+
+Export Number
+
+Date
+
+Utilisateur
+
+Batch
+
+Nombre lignes
+
+Nom fichier
+
+Statut
+
+=========================================================
+DETAIL EXPORT
+=========================================================
+
+Afficher :
+
+Filtres
+
+Utilisateur
+
+Date
+
+Nombre écritures
+
+Temps génération
+
+=========================================================
+REEXPORT
+=========================================================
+
+Autoriser :
+
+Réexporter
+
+sans régénérer les écritures.
+
+=========================================================
+SUPPRESSION
+=========================================================
+
+Autoriser la suppression uniquement :
+
+du fichier exporté.
+
+Ne jamais supprimer :
+
+AccountingBatch
+
+AccountingEntry
+
+=========================================================
+API
+=========================================================
+
+Créer :
+
+POST ExportBatch
+
+POST ExportByFilter
+
+GET ExportHistory
+
+GET ExportDetails
+
+GET DownloadExport
+
+DELETE DeleteExport
+
+=========================================================
+SERVICES
+=========================================================
+
+AccountingExportService
+
+ExcelExportService
+
+DownloadService
+
+=========================================================
+EXCEL
+=========================================================
+
+Utiliser OpenXML.
+
+Ne pas utiliser Interop.
+
+Créer un code propre.
+
+=========================================================
+AUDIT
+=========================================================
+
+Tracer :
+
+Création Export
+
+Téléchargement
+
+Réexport
+
+Suppression
+
+=========================================================
+SECURITE
+=========================================================
+
+Accès
+
+Supervisor uniquement.
+
+=========================================================
+REACT
+=========================================================
+
+Créer :
+
+Centre d'Exports
+
+Prévisualisation
+
+Dialogs
+
+Historique
+
+Téléchargement
+
+Badges
+
+=========================================================
+TESTS
+=========================================================
+
+Tester :
+
+Prévisualisation
+
+Export
+
+Réexport
+
+Téléchargement
+
+Suppression
+
+Historique
+
+=========================================================
+LIVRABLE
+=========================================================
+
+Analyse
+
+Architecture
+
+Backend
+
+Excel
+
+API
+
+React
+
+Tests
+
+Résumé

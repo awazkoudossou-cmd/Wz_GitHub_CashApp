@@ -1,0 +1,463 @@
+Tu es un architecte logiciel senior + développeur .NET senior.
+Je veux que tu me génères le **backend core complet** d’une webapp de gestion de caisse, **prêt à coder**, en respectant strictement les spécifications ci-dessous.
+
+# OBJECTIF DE CE PROMPT
+Dans CE prompt uniquement, je veux que tu construises **la fondation backend** :
+1. architecture backend
+2. arborescence des projets backend
+3. domain model
+4. enums / constantes
+5. entités métier
+6. AppDbContext
+7. configurations EF Core
+8. seed initial
+9. interfaces communes et contrats de base
+10. Program.cs de base + configuration DI minimale
+11. conventions techniques / structure de code
+
+Je ne veux pas encore tous les services métier détaillés ni tous les controllers complets : cela viendra dans le prompt 2.
+Mais je veux un backend core **réel, cohérent, compilable en grande partie**.
+
+---
+
+# 1) CONTEXTE DU PROJET
+
+Je veux une **webapp de gestion de caisse** avec :
+- authentification
+- gestion des utilisateurs
+- gestion des caisses
+- ouverture / fermeture de caisse
+- saisie entrée / sortie
+- journal des opérations
+- catégories
+- dashboard simple
+- export Excel / PDF
+- historique minimal
+- sauvegarde SQLite locale
+
+L’application est pensée en **V1 + V2**.
+
+## V1 MVP inclut
+- authentification
+- gestion simple des utilisateurs
+- gestion des caisses
+- ouverture / fermeture de caisse
+- saisie entrée / sortie
+- journal des opérations
+- catégories
+- dashboard simple
+- export Excel / PDF
+- SQLite locale
+- historique minimal
+- sauvegarde de la base
+
+## V2 à prévoir dans l’architecture
+- workflow de validation
+- transferts inter-caisses
+- dépôt banque
+- pièces jointes
+- anomalies
+- rapports avancés
+- multi-caisses plus robuste
+- gestion détaillée des écarts
+- import Excel/CSV
+- rapprochement / matching
+
+## Type de caisse couvert
+L’application doit couvrir :
+- dépenses internes
+- caisse de vente / encaissement
+- approvisionnements
+- transferts
+- dépôt banque
+
+---
+
+# 2) STACK TECHNIQUE IMPOSÉE
+
+## Backend
+- ASP.NET Core Web API
+- .NET 8
+- Entity Framework Core
+- SQLite locale
+- JWT Auth
+- FluentValidation
+
+---
+
+# 3) ARCHITECTURE BACKEND IMPOSÉE
+
+Je veux une architecture modulaire de ce type :
+
+backend/
+└─ CashApp.sln
+   ├─ src/
+   │  ├─ CashApp.Api/
+   │  ├─ CashApp.Application/
+   │  ├─ CashApp.Domain/
+   │  ├─ CashApp.Infrastructure/
+   │  └─ CashApp.Shared/
+   └─ tests/
+      ├─ CashApp.Application.Tests/
+      └─ CashApp.Api.Tests/
+
+## Responsabilités
+- CashApp.Api = controllers, Program.cs, DI, middleware, auth setup
+- CashApp.Application = DTO, interfaces, validators, logique applicative
+- CashApp.Domain = entités, enums, constantes métier
+- CashApp.Infrastructure = EF Core, DbContext, seed, auth infra, backup infra, export infra
+- CashApp.Shared = helpers / classes partagées
+
+---
+
+# 4) CONTRAINTE MAJEURE : MODE V1/V2 + MODULES ACTIVABLES
+
+Je veux un système où l’admin peut choisir :
+- un **mode applicatif** (V1/V2 ou Essential/Intermediate/Advanced)
+- des **modules activables / désactivables**
+
+## À prévoir dès maintenant dans le backend core
+- table `app_settings`
+- table `feature_settings`
+- constantes de settings
+- constantes de features
+- base de `FeatureService` (interface dans ce prompt, implémentation plus tard)
+- structures nécessaires pour exposer app mode + features au frontend
+
+---
+
+# 5) DOMAIN MODEL À PRÉVOIR
+
+Je veux au minimum les entités suivantes.
+
+## User
+- Id
+- Username
+- FullName
+- PasswordHash
+- RoleCode
+- IsActive
+- CreatedAt
+- UpdatedAt
+
+## CashRegister
+- Id
+- Code
+- Name
+- Description
+- CurrencyCode
+- IsActive
+- CreatedAt
+- UpdatedAt
+
+## UserCashRegister
+table de liaison utilisateur / caisse
+
+## Category
+- Id
+- Code
+- Label
+- Direction (IN / OUT)
+- IsActive
+- CreatedAt
+- UpdatedAt
+
+## CashSession
+- Id
+- CashRegisterId
+- OpenedBy
+- OpenedAt
+- OpeningBalance
+- ClosedBy
+- ClosedAt
+- TheoreticalBalance
+- PhysicalBalance
+- VarianceAmount
+- Status (OPEN / CLOSED)
+- OpenComment
+- CloseComment
+- CreatedAt
+- UpdatedAt
+
+## CashOperation
+- Id
+- OperationRef
+- CashRegisterId
+- CashSessionId
+- OperationDate
+- Direction (IN / OUT)
+- CategoryId
+- Amount
+- CurrencyCode
+- PaymentMethod
+- Label
+- Description
+- ExternalReference
+- ThirdPartyName
+- CreatedBy
+- CreatedAt
+- UpdatedBy
+- UpdatedAt
+- IsDeleted
+- DeletedBy
+- DeletedAt
+- DeleteReason
+
+## BackupLog
+- Id
+- FileName
+- FilePath
+- CreatedBy
+- CreatedAt
+
+## AppSetting
+- Id
+- SettingKey
+- SettingValue
+- UpdatedBy
+- UpdatedAt
+
+## FeatureSetting
+- Id
+- FeatureCode
+- FeatureName
+- IsEnabled
+- UpdatedBy
+- UpdatedAt
+
+---
+
+# 6) ENTITÉS À PRÉVOIR POUR LA V2 (ARCHITECTURE SEULEMENT)
+
+Prévoir dans le Domain, même si pas totalement utilisées maintenant :
+- CashTransfer
+- BankDeposit
+- Attachment
+- ApprovalRule
+- ApprovalAction
+- VarianceAction
+- ImportBatch
+- ImportBatchLine
+- ReconciliationBatch
+- ReconciliationItem
+- AuditLog
+
+Je veux qu’elles soient au moins pensées / esquissées proprement si tu juges utile.
+
+---
+
+# 7) ENUMS / CONSTANTES À CENTRALISER
+
+Je veux des enums ou classes de constantes pour :
+
+## rôles
+- ADMIN
+- SUPERVISOR
+- CASHIER
+
+## statut session
+- OPEN
+- CLOSED
+
+## direction opération
+- IN
+- OUT
+
+## payment method
+- CASH
+- MOBILE_MONEY
+- BANK_TRANSFER
+- CHECK
+
+## app mode
+- ESSENTIAL
+- INTERMEDIATE
+- ADVANCED
+
+## feature codes
+Créer `FeatureCodes` avec :
+- CORE_AUTH
+- CORE_USERS
+- CORE_CASH_REGISTERS
+- CORE_CASH_SESSIONS
+- CORE_OPERATIONS
+- CORE_CATEGORIES
+- CORE_DASHBOARD
+- CORE_EXPORTS
+- CORE_BACKUP
+- CORE_SETTINGS
+
+Et V2 :
+- ADV_VALIDATION
+- ADV_TRANSFERS
+- ADV_BANK_DEPOSITS
+- ADV_ATTACHMENTS
+- ADV_ADVANCED_REPORTS
+- ADV_IMPORTS
+- ADV_RECONCILIATION
+- ADV_VARIANCE_MANAGEMENT
+- ADV_ANOMALIES
+
+## settings keys
+Créer une classe de constantes pour :
+- APP_MODE
+- DEFAULT_CURRENCY
+- AUTO_BACKUP_ENABLED
+- AUTO_BACKUP_TIME
+- AUTO_BACKUP_ON_SESSION_CLOSE
+- ALLOW_OPERATION_EDIT_BEFORE_SESSION_CLOSE
+- ALLOW_SUPERVISOR_CLOSE_ANY_SESSION
+- OPERATION_REF_PREFIX
+- BACKUP_DIRECTORY
+
+---
+
+# 8) CONTRAINTES BASE DE DONNÉES IMPORTANTES
+
+Je veux les contraintes EF Core / SQLite suivantes :
+- users.username unique
+- cash_registers.code unique
+- categories.code unique
+- cash_operations.operation_ref unique
+- feature_settings.feature_code unique
+- app_settings.setting_key unique
+- user_cash_registers (user_id, cash_register_id) unique
+
+Je veux aussi des index utiles sur :
+- cash_operations.cash_register_id
+- cash_operations.cash_session_id
+- cash_operations.operation_date
+- cash_sessions.cash_register_id
+- cash_sessions.status
+
+---
+
+# 9) INTERFACES COMMUNES À PRÉVOIR DÈS MAINTENANT
+
+Je veux au moins les interfaces suivantes dans Application/Common/Interfaces :
+- ICurrentUserService
+- IDateTimeProvider
+- IPasswordHasher
+- IJwtTokenGenerator
+- IFeatureService
+- IReferenceGeneratorService
+- IBackupService
+- IExportService
+
+Je veux aussi une base pour :
+- Result / ApiResponse / paged response si tu juges utile
+- exceptions métier custom si pertinent
+
+---
+
+# 10) SEED INITIAL OBLIGATOIRE
+
+Je veux un seed initial contenant :
+
+## utilisateur admin
+- username = admin
+- mot de passe par défaut = Admin@123 (hashé)
+- rôle = ADMIN
+
+## app mode
+- APP_MODE = ESSENTIAL
+
+## features V1 activées
+- CORE_AUTH
+- CORE_USERS
+- CORE_CASH_REGISTERS
+- CORE_CASH_SESSIONS
+- CORE_OPERATIONS
+- CORE_CATEGORIES
+- CORE_DASHBOARD
+- CORE_EXPORTS
+- CORE_BACKUP
+- CORE_SETTINGS
+
+## features V2 désactivées
+- toutes les ADV_*
+
+## catégories par défaut
+- SALE / IN
+- ADVANCE / IN
+- PURCHASE / OUT
+- TRANSPORT / OUT
+- FUEL / OUT
+- OFFICE_SUPPLIES / OUT
+
+---
+
+# 11) CE QUE JE VEUX EN SORTIE DE CE PROMPT
+
+Réponds en blocs dans cet ordre :
+
+## PARTIE A — Vue d’ensemble backend
+- architecture globale
+- conventions de nommage
+- stratégie V1/V2 + features
+
+## PARTIE B — Arborescence backend détaillée
+Donne l’arborescence complète des projets backend et dossiers.
+
+## PARTIE C — Domain model
+Donne les entités, enums, constantes, settings keys, feature codes.
+
+## PARTIE D — Code du Domain
+Je veux du vrai code C# pour :
+- entités principales
+- enums / constantes
+- base entity si tu en utilises une
+
+## PARTIE E — Application Common
+Je veux le code des interfaces communes :
+- ICurrentUserService
+- IDateTimeProvider
+- IPasswordHasher
+- IJwtTokenGenerator
+- IFeatureService
+- IReferenceGeneratorService
+- IBackupService
+- IExportService
+
+## PARTIE F — Infrastructure Persistence
+Je veux :
+- AppDbContext complet
+- DbSet
+- configurations EF Core
+- index / contraintes
+- conversions enum si nécessaire
+- stratégie soft delete si tu en mets une
+
+## PARTIE G — Seed
+Je veux :
+- un `DbSeeder` ou équivalent
+- le code de seed initial complet
+- création admin + settings + features + catégories
+
+## PARTIE H — Program.cs minimal
+Je veux un `Program.cs` backend de base qui configure :
+- controllers
+- swagger
+- DbContext SQLite
+- auth JWT (même si les services seront détaillés plus tard)
+- DI des services de base / placeholders
+- CORS de dev
+
+## PARTIE I — Fichiers minimums à créer
+Liste finale des fichiers générés / à générer ensuite.
+
+---
+
+# 12) CONTRAINTES DE QUALITÉ
+
+- Donne du **vrai code C#**
+- Pas de pseudo-code flou
+- Si un fichier est trop long, donne une version initiale cohérente
+- Respecte strictement la cohérence entre Domain / DbContext / seed / settings / features
+- Si tu fais des hypothèses, indique-les brièvement
+
+Important :
+**Ne génère pas encore les gros services métier détaillés ni tous les controllers métier**.
+Concentre-toi sur la **fondation backend propre et prête à accueillir le prompt 2**.
+
+Commence maintenant.

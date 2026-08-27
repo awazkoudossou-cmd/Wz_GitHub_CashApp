@@ -1,0 +1,399 @@
+Nous poursuivons exactement le même projet.
+
+Ne jamais modifier les prompts précédents.
+
+Développer entièrement le module Brouillard Comptable.
+
+=========================================================
+OBJECTIF
+=========================================================
+
+Créer un véritable Brouillard Comptable professionnel.
+
+Le Brouillard contient toutes les écritures générées.
+
+Chaque écriture appartient obligatoirement à un AccountingBatch.
+
+Le Brouillard est consultable uniquement.
+
+Les modifications sont limitées.
+
+=========================================================
+MENU
+=========================================================
+
+Créer le menu
+
+Comptabilité
+
+    Génération
+
+        Brouillard Comptable
+
+=========================================================
+LISTE PRINCIPALE
+=========================================================
+
+Afficher un DataGrid Material UI.
+
+Colonnes :
+
+Date génération
+
+Batch
+
+Date opération
+
+Date comptable
+
+Journal
+
+Référence
+
+Numéro de pièce
+
+Compte
+
+Libellé
+
+Débit
+
+Crédit
+
+Utilisateur
+
+Etat
+
+=========================================================
+FILTRES
+=========================================================
+
+Créer les filtres :
+
+Date début
+
+Date fin
+
+Journal
+
+Compte
+
+Caisse
+
+Catégorie
+
+Utilisateur
+
+Batch
+
+Etat
+
+Référence
+
+Numéro de pièce
+
+Recherche plein texte.
+
+=========================================================
+TRI
+=========================================================
+
+Toutes les colonnes doivent être triables.
+
+=========================================================
+PAGINATION
+=========================================================
+
+Pagination serveur.
+
+=========================================================
+DETAIL
+=========================================================
+
+Double-clic
+
+↓
+
+Afficher le détail complet :
+
+Batch
+
+Opération de caisse
+
+Session
+
+Utilisateur
+
+Catégorie
+
+Compte
+
+Journal
+
+Libellé
+
+Débit
+
+Crédit
+
+Commentaires
+
+=========================================================
+BATCH
+=========================================================
+
+Créer une vue
+
+Liste des Batch.
+
+Colonnes :
+
+Batch Number
+
+Date
+
+Mode
+
+Type
+
+Nombre opérations
+
+Nombre écritures
+
+Utilisateur
+
+Etat
+
+Exporté
+
+=========================================================
+DETAIL BATCH
+=========================================================
+
+Depuis un Batch
+
+Afficher
+
+Toutes les écritures
+
+Total Débit
+
+Total Crédit
+
+Nombre opérations
+
+Nombre écritures
+
+Temps de génération
+
+=========================================================
+MODIFICATION
+=========================================================
+
+Autoriser uniquement :
+
+Modification du Libellé
+
+Ajout d'un commentaire
+
+Aucune autre modification.
+
+=========================================================
+VERROUILLAGE
+=========================================================
+
+Si Batch exporté
+
+Toutes les écritures deviennent
+
+READ ONLY.
+
+=========================================================
+SUPPRESSION
+=========================================================
+
+Autoriser la suppression uniquement si :
+
+Batch non exporté
+
+Confirmation obligatoire.
+
+Supprimer :
+
+AccountingEntry
+
+AccountingGenerationLog
+
+AccountingBatch
+
+Ne jamais supprimer les CashOperation.
+
+=========================================================
+REGENERATION
+=========================================================
+
+Bouton
+
+Regénérer
+
+Le système :
+
+Supprime les écritures du Batch
+
+Puis relance
+
+AccountingGenerationService
+
+=========================================================
+EQUILIBRE
+=========================================================
+
+Afficher automatiquement
+
+Total Débit
+
+Total Crédit
+
+Différence
+
+Si
+
+Différence ≠ 0
+
+Afficher une alerte rouge.
+
+=========================================================
+ALERTES
+=========================================================
+
+Afficher :
+
+Nombre d'écritures
+
+Nombre de Batch
+
+Nombre de brouillards exportés
+
+Nombre d'opérations en attente
+
+=========================================================
+EXPORT
+=========================================================
+
+Depuis un Batch
+
+Exporter Excel.
+
+Depuis la liste
+
+Exporter selon les filtres.
+
+=========================================================
+API
+=========================================================
+
+Créer :
+
+GetEntries
+
+GetEntry
+
+GetBatches
+
+GetBatch
+
+DeleteBatch
+
+RegenerateBatch
+
+UpdateDescription
+
+ExportBatch
+
+=========================================================
+SERVICES
+=========================================================
+
+AccountingBatchService
+
+AccountingEntryService
+
+AccountingExportService
+
+=========================================================
+AUDIT
+=========================================================
+
+Tracer :
+
+Modification libellé
+
+Suppression Batch
+
+Regénération
+
+Export
+
+=========================================================
+REACT
+=========================================================
+
+Créer intégralement :
+
+DataGrid
+
+Dialogs
+
+Drawer détail
+
+Filtres
+
+Toolbar
+
+Actions
+
+Badges
+
+Snackbars
+
+Responsive
+
+Dark Mode
+
+=========================================================
+TESTS
+=========================================================
+
+Créer les tests :
+
+Suppression
+
+Verrouillage
+
+Regénération
+
+Filtres
+
+Tri
+
+Pagination
+
+Export
+
+=========================================================
+LIVRABLE
+=========================================================
+
+Analyse
+
+Architecture
+
+Backend
+
+API
+
+React
+
+Tests
+
+Résumé

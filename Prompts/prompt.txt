@@ -1,0 +1,19 @@
+_____________________A la cloture de session, en cas d'ecart, la justification devrait etre obligatoire
+_____________________lors de l'ouverture d'une caisse, que le solde de départ soit le solde physique de cloture par défaut ou 0 selon paramettrage
+_______________________lors qu'on fait "Finaliser" pour une opération, mettre à jour automatiquement la page et afficher une notification popup
+______________________lorsqu'un "dépôt banque" est créé aucune modification dans le menu "operations" ne doit plus etre possible
+______________________lorsqu'un "Transferts inter-caisses" est créé aucune modification dans le menu "operations" ne doit plus etre possible
+___________________Pratiquement toutes les regles de validations ça ne fonctionnent pas bien
+___________________Pouvoir collapser les menus suivant leur groupe dans la sidebar, seul le "Tableau de bord" n'aura pas de groupe
+___________________que le "Journal d'audit" affiche aussi les montants impliqués dans l'opération
+____________________masquer le module "Anomalies" dans l'appli
+___lorsqu'on change le "Mode de l'application" il faut que les modules à cocher ou décocher s'adaptent en conséquence
+___lorsque aucune session n'est ouverte pour la caisse affectée a l'utilisateur, lorsqu'on fait "nouvelle opération", il faut afficher un popup disant d'aller ouvrir une session avant de continuer
+___dans les parametres pouvoir définir les informations de l'entreprise
+___pouvoir éditer en pdf (sous format A5) les reçus de caisse avec en entete les informations de l'entreprise (dans les parametres, indiquer si ce sera une ou deux copies qui seront affichées 
+
+____________________________________________________________
+
+________________lorsque l'annulation d'une opération (qui avait le statut="APPROVED") est rejetée, il faut que le statut de l'operation redevienne "APPROVED"
+une operation de statut="PENDING_APPROVAL" peut etre annulée sans besoin de validation
+lorsqu'une operation est validée via le workflow de validation, sa modification sera impossible, son annulation sera obligatoirement soumise au workflow de validation et lorsque cette annulation aura été validée, l'opération ne disparaitra pas de la liste des operations mais elle sera dupliquée avec un montant négatif (la description de cette opération devra indiquer qu'il s'agit une annulation

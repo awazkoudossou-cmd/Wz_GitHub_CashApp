@@ -1,0 +1,24 @@
+## .NET
+bin/
+obj/
+out/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+## Rider
+.idea/
+
+## VS Code
+.vscode/
+
+## SQLite local databases / backups
+*.db
+*.db-shm
+*.db-wal
+backups/
+
+## Logs
+*.log

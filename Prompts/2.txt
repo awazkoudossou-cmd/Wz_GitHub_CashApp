@@ -1,0 +1,425 @@
+Nous continuons le même projet de webapp de gestion de caisse.
+Tu dois rester **strictement cohérent** avec l’architecture, les entités, le DbContext, les constantes, le seed et les conventions que tu as déjà définis dans le prompt précédent.
+
+# OBJECTIF DE CE PROMPT
+Je veux maintenant que tu génères **le backend métier V1 prêt à coder**, en t’appuyant sur la fondation backend déjà définie.
+
+Dans CE prompt, je veux :
+1. DTO par module
+2. validators FluentValidation
+3. services métier V1
+4. implémentations des services
+5. Auth complet
+6. gestion des users
+7. gestion des caisses
+8. gestion des catégories
+9. ouverture / fermeture de caisse
+10. opérations de caisse
+11. dashboard simple
+12. settings + feature management
+13. backup + export (squelette fonctionnel)
+14. controllers API
+15. endpoints REST complets
+16. règles métier codées dans les bons services
+
+Je veux **du vrai code C#**, pas juste une description.
+
+---
+
+# 1) RAPPEL FONCTIONNEL V1
+
+La V1 inclut :
+- authentification
+- gestion simple des utilisateurs
+- gestion des caisses
+- ouverture / fermeture de caisse
+- saisie entrée / sortie
+- journal des opérations
+- catégories
+- dashboard simple
+- export Excel / PDF
+- SQLite locale
+- historique minimal
+- sauvegarde de la base
+
+Cible :
+- ADMIN
+- SUPERVISOR
+- CASHIER
+
+---
+
+# 2) DTO À GÉNÉRER
+
+Je veux des DTO propres, séparés par module.
+
+## Auth
+- LoginRequestDto
+- LoginResponseDto
+- CurrentUserDto
+- CurrentCashRegisterDto
+- FeatureDto
+
+## Users
+- UserListItemDto
+- UserDetailDto
+- CreateUserDto
+- UpdateUserDto
+- UpdateUserStatusDto
+- ResetPasswordDto
+
+## Cash Registers
+- CashRegisterListItemDto
+- CashRegisterDetailDto
+- CreateCashRegisterDto
+- UpdateCashRegisterDto
+- UpdateCashRegisterStatusDto
+
+## Categories
+- CategoryListItemDto
+- CategoryDetailDto
+- CreateCategoryDto
+- UpdateCategoryDto
+- UpdateCategoryStatusDto
+
+## Cash Sessions
+- CashSessionListItemDto
+- CashSessionDetailDto
+- OpenCashSessionDto
+- CloseCashSessionDto
+- CashSessionSummaryDto
+
+## Cash Operations
+- CashOperationListItemDto
+- CashOperationDetailDto
+- CreateCashOperationDto
+- UpdateCashOperationDto
+- CancelCashOperationDto
+
+## Dashboard
+- CashierDashboardDto
+- SupervisorDashboardDto
+- CashSessionWidgetDto
+- OperationWidgetDto
+
+## Exports
+- ExportOperationsRequestDto
+- ExportSessionsRequestDto
+- ExportCashStateRequestDto
+- ExportFileDto
+
+## Backups
+- BackupListItemDto
+- CreateBackupResponseDto
+- RestoreBackupDto
+
+## Settings / Features
+- AppModeDto
+- UpdateAppModeDto
+- FeatureSettingDto
+- UpdateFeatureSettingsDto
+- GeneralSettingsDto
+
+---
+
+# 3) VALIDATION FLUENTVALIDATION À FOURNIR
+
+Je veux des validators pour au minimum :
+- CreateUserDto
+- CreateCashRegisterDto
+- CreateCategoryDto
+- OpenCashSessionDto
+- CloseCashSessionDto
+- CreateCashOperationDto
+- UpdateCashOperationDto
+
+Les règles doivent être cohérentes avec le métier.
+
+---
+
+# 4) SERVICES À IMPLÉMENTER
+
+Je veux les interfaces + implémentations de base pour :
+
+- IAuthService / AuthService
+- IUserService / UserService
+- ICashRegisterService / CashRegisterService
+- ICategoryService / CategoryService
+- ICashSessionService / CashSessionService
+- ICashOperationService / CashOperationService
+- IDashboardService / DashboardService
+- ISettingsService / SettingsService
+- IFeatureService / FeatureService
+
+Et au moins une première version réaliste de :
+- IBackupService / BackupService
+- IExportService / ExportService
+- IReferenceGeneratorService / ReferenceGeneratorService
+
+---
+
+# 5) RESPONSABILITÉS ATTENDUES DES SERVICES
+
+## AuthService
+- login
+- vérification mot de passe
+- génération JWT
+- récupération utilisateur courant
+- chargement des caisses autorisées
+- chargement des features actives
+- chargement du mode app
+
+## UserService
+- CRUD user
+- affectation aux caisses
+- activation / désactivation
+- reset mot de passe
+
+## CashRegisterService
+- CRUD caisse
+- activation / désactivation
+- listing / détail
+
+## CategoryService
+- CRUD catégorie
+- validation IN / OUT
+- activation / désactivation
+
+## CashSessionService
+- ouvrir session
+- fermer session
+- recalculer solde théorique
+- vérifier unicité session ouverte par caisse
+- détail / liste sessions
+
+## CashOperationService
+- créer opération
+- modifier opération
+- annuler opération (soft delete logique)
+- lister opérations
+- recalcul session après changement
+- vérifier session ouverte
+- vérifier cohérence catégorie / direction
+
+## DashboardService
+- dashboard caissier
+- dashboard superviseur
+- KPI session active
+- KPI du jour
+- sessions en écart
+
+## SettingsService
+- lire / écrire paramètres généraux
+- lire / écrire mode de l’application
+
+## FeatureService
+- lire les modules actifs
+- activer / désactiver modules
+- vérifier dépendances
+- IsEnabled(featureCode)
+- EnsureEnabled(featureCode)
+
+## BackupService
+- créer sauvegarde du fichier SQLite
+- journaliser sauvegarde
+- restaurer sauvegarde
+- lister sauvegardes
+
+## ExportService
+Je veux une première version réaliste :
+- export opérations Excel
+- export opérations PDF
+- export sessions Excel / PDF
+- export état de caisse PDF
+
+Si tu ne peux pas détailler à fond les exports, fournis au moins un squelette propre + contrats + stratégie d’implémentation.
+
+---
+
+# 6) RÈGLES MÉTIER À CODER ABSOLUMENT
+
+## ouverture de caisse
+- caisse active obligatoire
+- utilisateur affecté à la caisse
+- aucune session ouverte existante sur cette caisse
+- montant d’ouverture >= 0
+
+## création opération
+- session ouverte obligatoire
+- catégorie obligatoire
+- catégorie cohérente avec direction
+- montant > 0
+- mode de paiement obligatoire
+- caisse cohérente avec session
+
+## modification opération
+- session non clôturée
+- opération non supprimée
+- droit utilisateur OK
+
+## annulation opération
+- soft delete logique uniquement
+- recalcul session obligatoire
+
+## fermeture session
+- session ouverte obligatoire
+- saisie du solde physique
+- calcul théorique
+- calcul écart
+- verrouillage logique session
+
+## calcul du solde théorique
+TheoreticalBalance = OpeningBalance + Sum(IN) - Sum(OUT)
+en excluant les opérations supprimées logiquement.
+
+---
+
+# 7) GÉNÉRATION DE RÉFÉRENCE D’OPÉRATION
+
+Je veux un `ReferenceGeneratorService`.
+Exemples de format :
+- OP-20260623-0001
+ou mieux
+- CAISSE1-20260623-0001
+
+Le service doit être réutilisable et cohérent avec les paramètres généraux (prefix éventuel).
+
+---
+
+# 8) PARAMÈTRES GÉNÉRAUX À EXPOSER / GÉRER
+
+Je veux que les settings permettent de stocker et gérer au minimum :
+- APP_MODE
+- DEFAULT_CURRENCY
+- AUTO_BACKUP_ENABLED
+- AUTO_BACKUP_TIME
+- AUTO_BACKUP_ON_SESSION_CLOSE
+- ALLOW_OPERATION_EDIT_BEFORE_SESSION_CLOSE
+- ALLOW_SUPERVISOR_CLOSE_ANY_SESSION
+- OPERATION_REF_PREFIX
+- BACKUP_DIRECTORY
+
+---
+
+# 9) ENDPOINTS API À GÉNÉRER
+
+Je veux les controllers + actions pour :
+
+## Auth
+- POST /api/auth/login
+- GET /api/auth/me
+
+## Users
+- GET /api/users
+- GET /api/users/{id}
+- POST /api/users
+- PUT /api/users/{id}
+- PATCH /api/users/{id}/status
+- POST /api/users/{id}/reset-password
+
+## Cash Registers
+- GET /api/cash-registers
+- GET /api/cash-registers/{id}
+- POST /api/cash-registers
+- PUT /api/cash-registers/{id}
+- PATCH /api/cash-registers/{id}/status
+
+## Categories
+- GET /api/categories
+- POST /api/categories
+- PUT /api/categories/{id}
+- PATCH /api/categories/{id}/status
+
+## Cash Sessions
+- GET /api/cash-sessions
+- GET /api/cash-sessions/{id}
+- POST /api/cash-sessions/open
+- POST /api/cash-sessions/{id}/close
+
+## Cash Operations
+- GET /api/cash-operations
+- GET /api/cash-operations/{id}
+- POST /api/cash-operations
+- PUT /api/cash-operations/{id}
+- PATCH /api/cash-operations/{id}/cancel
+
+## Dashboard
+- GET /api/dashboard/cashier?cashRegisterId=1
+- GET /api/dashboard/supervisor
+
+## Backups
+- GET /api/backups
+- POST /api/backups/create
+- POST /api/backups/restore
+
+## Settings
+- GET /api/settings/general
+- PUT /api/settings/general
+- GET /api/settings/app-mode
+- PUT /api/settings/app-mode
+- GET /api/settings/features
+- PUT /api/settings/features
+
+---
+
+# 10) FORMAT DE TA RÉPONSE
+
+Je veux que tu répondes dans cet ordre :
+
+## PARTIE A — Organisation des dossiers Application / Api
+Montre où tu ranges DTO, validators, services, controllers.
+
+## PARTIE B — DTO complets
+Donne le code des DTO module par module.
+
+## PARTIE C — Validators
+Donne les validators FluentValidation.
+
+## PARTIE D — Interfaces de services
+Donne les interfaces complètes.
+
+## PARTIE E — Implémentations des services
+Je veux du vrai code C# pour :
+- AuthService
+- UserService
+- CashRegisterService
+- CategoryService
+- CashSessionService
+- CashOperationService
+- DashboardService
+- SettingsService
+- FeatureService
+- ReferenceGeneratorService
+- BackupService (première version)
+- ExportService (première version)
+
+## PARTIE F — Controllers API
+Donne le code des controllers :
+- AuthController
+- UsersController
+- CashRegistersController
+- CategoriesController
+- CashSessionsController
+- CashOperationsController
+- DashboardController
+- BackupsController
+- SettingsController
+
+## PARTIE G — Ajustements Program.cs / DI
+Ajoute les registrations de services, validators, auth, etc.
+
+## PARTIE H — Points à terminer ensuite
+Liste les points qui resteront pour le frontend / les exports avancés / la V2.
+
+---
+
+# 11) CONTRAINTES DE QUALITÉ
+
+- Donne du vrai code C#
+- Respecte strictement le Domain/DbContext déjà définis
+- Pas de pseudo-code flou
+- Si un service est trop long, donne une version initiale fonctionnelle et cohérente
+- Les contrôles métier doivent être dans les services, pas dans les controllers
+- Les controllers doivent rester fins
+
+Commence maintenant.

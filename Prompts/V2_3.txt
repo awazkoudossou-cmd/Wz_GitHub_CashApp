@@ -1,0 +1,638 @@
+Nous continuons exactement le même projet de webapp de gestion de caisse.
+Tu dois rester strictement cohérent avec tout ce qui a déjà été défini et généré précédemment, y compris :
+- la V1
+- le backend V2-A
+- le backend V2-B
+
+# 1) CONTEXTE PROJET À RESPECTER
+
+## Stack
+- Backend : ASP.NET Core Web API
+- Frontend : React + TypeScript
+- Base : SQLite côté backend
+- Frontend modulaire React
+
+## V1 déjà existante
+Le frontend V1 gère déjà :
+- authentification
+- layout général
+- dashboard simple
+- utilisateurs
+- caisses
+- sessions de caisse
+- opérations
+- catégories
+- exports
+- backups
+- paramètres / settings
+- système AppMode + FeatureFlags
+
+## V2 backend déjà définie
+### V2-A
+- workflow de validation
+- transferts inter-caisses
+- dépôt banque
+- anomalies
+- gestion détaillée des écarts
+- audit log
+
+### V2-B
+- pièces jointes
+- import Excel / CSV
+- rapprochement
+- rapports avancés
+
+## Modes applicatifs
+- ESSENTIAL
+- INTERMEDIATE
+- ADVANCED
+
+## Feature flags
+Le frontend doit respecter le système de modules activables.
+Au minimum les features suivantes existent :
+- ADV_VALIDATION
+- ADV_TRANSFERS
+- ADV_BANK_DEPOSITS
+- ADV_ATTACHMENTS
+- ADV_ADVANCED_REPORTS
+- ADV_IMPORTS
+- ADV_RECONCILIATION
+- ADV_VARIANCE_MANAGEMENT
+- ADV_ANOMALIES
+- ADV_AUDIT_LOG
+
+## Rôles
+- ADMIN
+- SUPERVISOR
+- CASHIER
+
+## Contrainte absolue
+Le frontend V2 doit être une **extension de la V1**, pas une réécriture complète.
+
+---
+
+# 2) OBJECTIF DE CE PROMPT V2-C
+
+Je veux que tu conçoives la **partie frontend React complète de la V2**, prête à coder, pour tous les modules V2.
+
+Je veux :
+- arborescence frontend
+- types TypeScript
+- clients API
+- hooks React Query ou hooks custom selon l’architecture existante
+- routes
+- pages
+- composants
+- guards de features
+- gestion des rôles
+- structure UI / UX
+- intégration avec AppMode + modules activables
+- intégration avec les endpoints backend V2-A et V2-B
+
+Je veux une réponse **très concrète**, pas juste une liste d’écrans.
+
+---
+
+# 3) PAGES V2 À AJOUTER
+
+Je veux au minimum les pages suivantes :
+
+## Validation
+- /approval-rules
+- /approval-requests
+- /approval-requests/:id
+
+## Transferts
+- /cash-transfers
+- /cash-transfers/new
+- /cash-transfers/:id
+
+## Dépôts banque
+- /bank-deposits
+- /bank-deposits/new
+- /bank-deposits/:id
+
+## Anomalies
+- /anomalies
+- /anomalies/:id
+
+## Variances / écarts
+- si pertinent : /variances
+- si pertinent : /variances/:id
+ou intégrer les détails variance dans la page session si tu préfères, mais explique clairement le choix
+
+## Imports
+- /imports
+- /imports/:id
+
+## Rapprochement
+- /reconciliation
+- /reconciliation/:id
+
+## Rapports
+- /reports/cash
+- /reports/categories
+- /reports/variances
+- /reports/transfers
+- /reports/deposits
+- /reports/anomalies
+- /reports/approvals
+
+## Audit
+- /audit-logs
+- /audit-logs/:id si utile
+
+---
+
+# 4) MODULE FRONTEND — VALIDATION
+
+## Ce que je veux
+### Approval rules
+- page liste des règles
+- formulaire création / édition
+- activation / désactivation si prévu
+
+### Approval requests
+- liste des demandes de validation
+- filtres :
+  - statut
+  - type
+  - caisse
+  - date
+- page détail :
+  - résumé de la demande
+  - entité liée
+  - historique des actions
+  - boutons approuver / rejeter
+  - champ commentaire
+
+## UI attendue
+- badges de statut
+- timeline ou bloc historique
+- panneau résumé de l’objet lié si possible
+
+---
+
+# 5) MODULE FRONTEND — TRANSFERTS INTER-CAISSES
+
+## Ce que je veux
+- page liste des transferts
+- filtres :
+  - statut
+  - caisse source
+  - caisse destination
+  - période
+- page création transfert
+- page détail transfert
+
+## Sur le détail
+Afficher :
+- référence
+- source / destination
+- montant
+- motif
+- statut
+- historique
+- validation si applicable
+- pièces jointes si feature active
+
+## Actions
+- créer
+- approuver / rejeter si autorisé
+- finaliser si la logique backend le permet
+
+---
+
+# 6) MODULE FRONTEND — DÉPÔTS BANQUE
+
+## Ce que je veux
+- page liste des dépôts
+- page création
+- page détail
+
+## Détail dépôt
+Afficher :
+- référence
+- caisse
+- date
+- banque
+- montant
+- statut
+- validation
+- pièces jointes
+- historique
+
+---
+
+# 7) MODULE FRONTEND — ANOMALIES
+
+## Ce que je veux
+- liste anomalies
+- filtres :
+  - statut
+  - sévérité
+  - caisse
+  - période
+- page détail anomalie
+- affectation
+- résolution
+- historique / commentaires si disponibles
+
+## UI
+- badges de sévérité
+- badges de statut
+- bloc entité liée
+- bloc résolution
+
+---
+
+# 8) MODULE FRONTEND — VARIANCES / ÉCARTS
+
+## Ce que je veux
+La gestion détaillée des écarts doit être visible côté UI.
+
+Tu peux choisir l’une des 2 approches, mais tu dois être cohérent :
+### Option A
+- page dédiée /variances + détail variance
+### Option B
+- section Variance enrichie dans la page détail de session de caisse
+
+Dans les deux cas, je veux :
+- affichage de l’écart
+- justification
+- historique des actions
+- éventuelle validation associée
+- lien vers anomalie si créée
+
+---
+
+# 9) MODULE FRONTEND — PIÈCES JOINTES
+
+## Ce que je veux
+Créer un composant réutilisable d’attachments :
+- upload fichier
+- liste des pièces jointes
+- téléchargement
+- suppression si autorisée
+
+## Le composant doit pouvoir être réutilisé dans :
+- détail opération
+- détail transfert
+- détail dépôt
+- détail anomalie
+- détail approval request
+- détail import batch
+- détail rapprochement si utile
+
+Je veux une API de composant propre du type :
+- entityType
+- entityId
+- canUpload
+- canDelete
+
+---
+
+# 10) MODULE FRONTEND — IMPORTS
+
+## Ce que je veux
+- page liste des imports
+- page détail import batch
+- workflow :
+  1. upload du fichier
+  2. preview des lignes
+  3. affichage erreurs
+  4. confirmation import
+
+## UI attendue
+### Liste imports
+- batch ref
+- type
+- statut
+- date
+- nombre de lignes
+- erreurs
+
+### Détail import
+- résumé batch
+- tableau preview des lignes
+- colonnes :
+  - numéro ligne
+  - statut
+  - message erreur
+  - données lues
+- bouton confirmer import
+- pièces jointes éventuelles si utile
+
+---
+
+# 11) MODULE FRONTEND — RAPPROCHEMENT
+
+## Ce que je veux
+- page liste des batchs de rapprochement
+- page détail batch
+
+## Détail batch
+Afficher :
+- référence
+- type
+- statut
+- caisse
+- lignes rapprochées / non rapprochées
+- écarts éventuels
+
+## Actions
+- créer un batch
+- sélectionner les éléments à rapprocher
+- lancer le matching manuel
+- afficher le résultat
+
+---
+
+# 12) MODULE FRONTEND — RAPPORTS AVANCÉS
+
+## Ce que je veux
+Pages séparées ou structure réutilisable pour :
+- rapport caisse
+- rapport catégories
+- rapport écarts
+- rapport transferts
+- rapport dépôts
+- rapport anomalies
+- rapport validations
+
+## Pour chaque page de rapport
+Je veux :
+- bloc filtres
+- bouton appliquer
+- tableau de résultats
+- résumé / KPIs en haut si pertinent
+- export si l’API le permet
+
+## Filtres fréquents
+- période
+- caisse
+- statut
+- catégorie selon le rapport
+- utilisateur si pertinent
+
+---
+
+# 13) MODULE FRONTEND — AUDIT LOG
+
+## Ce que je veux
+- page liste audit logs
+- filtres :
+  - action
+  - entité
+  - utilisateur
+  - période
+- page détail si utile
+ou drawer de détail si tu préfères
+
+## Détail
+Afficher :
+- action
+- date
+- utilisateur
+- entité
+- description
+- old/new values si disponibles
+
+---
+
+# 14) MENU / NAVIGATION V2
+
+Je veux que tu conçoives le menu V2 dans la sidebar.
+
+## Exemple de sections possibles
+- Dashboard
+- Opérations
+- Sessions
+- Caisses
+- Validation
+- Transferts
+- Dépôts banque
+- Anomalies
+- Imports
+- Rapprochement
+- Rapports
+- Audit
+- Paramètres
+
+Mais tu peux proposer une organisation plus propre si elle est cohérente.
+
+## Règle obligatoire
+Chaque entrée de menu V2 doit être conditionnée par :
+- le rôle
+- la feature correspondante
+- éventuellement le mode applicatif si nécessaire
+
+---
+
+# 15) FEATURE GUARDS / ACCESS GUARDS FRONTEND
+
+Je veux une logique propre pour :
+- masquer les menus non activés
+- bloquer l’accès direct à une route non autorisée
+- gérer :
+  - rôle
+  - feature flag
+  - éventuellement mode applicatif
+
+Je veux que tu proposes / réutilises des composants ou hooks du type :
+- FeatureGuard
+- RoleGuard
+- useFeatureFlags
+- useAppMode
+- useCurrentUserPermissions
+
+---
+
+# 16) API CLIENT FRONTEND À AJOUTER
+
+Je veux les fichiers API / services frontend pour tous les modules V2 :
+
+## Validation
+- approvalRulesApi
+- approvalRequestsApi
+
+## Transferts
+- cashTransfersApi
+
+## Dépôts
+- bankDepositsApi
+
+## Anomalies
+- anomaliesApi
+
+## Variances
+- variancesApi si tu gardes une page dédiée
+
+## Attachments
+- attachmentsApi
+
+## Imports
+- importsApi
+
+## Reconciliation
+- reconciliationApi
+
+## Reports
+- reportsApi
+
+## Audit logs
+- auditLogsApi
+
+Je veux aussi les hooks associés si l’architecture frontend utilise React Query ou équivalent.
+
+---
+
+# 17) TYPES TYPESCRIPT À AJOUTER
+
+Je veux tous les types TS correspondant aux DTO backend V2 :
+- approval rules / approval requests
+- cash transfers
+- bank deposits
+- anomalies
+- variances
+- attachments
+- imports
+- reconciliation
+- reports
+- audit logs
+
+Je veux une organisation propre des types par module.
+
+---
+
+# 18) COMPOSANTS RÉUTILISABLES V2 À CRÉER
+
+Je veux que tu proposes des composants UI réutilisables pour éviter la duplication.
+
+## Exemples
+- StatusBadge
+- SeverityBadge
+- ApprovalStatusBadge
+- TransferStatusBadge
+- DepositStatusBadge
+- AttachmentPanel
+- ApprovalTimeline
+- ReportFiltersPanel
+- ReportSummaryCards
+- ImportPreviewTable
+- ReconciliationItemsTable
+- EntitySummaryCard
+- AuditDetailsPanel
+
+Tu peux compléter la liste si utile.
+
+---
+
+# 19) DESIGN / UX ATTENDU
+
+Je veux une UI cohérente avec la V1 :
+- design sobre, pro, back-office
+- sidebar + topbar
+- tables lisibles
+- formulaires propres
+- pages détail bien structurées
+- badges de statut
+- cartes de synthèse
+- drawer / modal si pertinent
+- responsive minimum sans viser du mobile-first total
+
+## Structure de page recommandée
+Pour les pages détail importantes, j’aime bien :
+- en-tête avec titre + actions
+- bloc résumé
+- bloc statut / workflow
+- bloc pièces jointes
+- bloc historique / timeline
+- bloc données détaillées
+
+Tu peux reprendre cette logique.
+
+---
+
+# 20) CE QUE JE VEUX EN SORTIE
+
+Réponds dans cet ordre exact :
+
+## PARTIE A — Vue d’ensemble frontend V2
+- principes d’architecture frontend
+- intégration avec la V1
+- intégration avec AppMode + FeatureFlags + rôles
+
+## PARTIE B — Arborescence frontend V2
+Je veux l’arborescence détaillée des dossiers / fichiers à ajouter ou modifier.
+
+## PARTIE C — Types TypeScript
+Tous les types TS par module.
+
+## PARTIE D — API client frontend
+Tous les fichiers API / services pour appeler les endpoints backend V2.
+
+## PARTIE E — Hooks frontend
+Hooks par module :
+- queries
+- mutations
+- hooks de guards / permissions si nécessaire
+
+## PARTIE F — Routing / guards / menu dynamique
+- routes V2
+- exemple de route config
+- FeatureGuard / RoleGuard
+- logique d’affichage menu
+
+## PARTIE G — Pages V2
+Pour chaque page V2, donne :
+- objectif
+- structure UI
+- composants utilisés
+- données chargées
+- actions possibles
+
+Je veux couvrir :
+- approval-rules
+- approval-requests
+- cash-transfers
+- bank-deposits
+- anomalies
+- variances ou détail session enrichi
+- imports
+- reconciliation
+- reports/*
+- audit-logs
+
+## PARTIE H — Composants réutilisables V2
+Donne le design de chaque composant important et son API de props.
+
+## PARTIE I — Scénarios UX détaillés
+Explique les parcours complets suivants :
+1. un superviseur approuve un transfert
+2. un caissier crée un dépôt banque avec justificatif
+3. un admin importe un fichier d’opérations puis confirme l’import
+4. un superviseur traite une anomalie
+5. un utilisateur consulte un rapport avancé
+6. un admin consulte l’audit log
+
+## PARTIE J — Points d’intégration avec le backend V2
+Montre clairement quels endpoints backend sont consommés par quelles pages / quels composants.
+
+## PARTIE K — Ce qui peut rester pour une V2.1 côté frontend
+Liste ce qui peut être amélioré plus tard sans bloquer la V2.
+
+---
+
+# 21) CONTRAINTES DE QUALITÉ
+
+- reste strictement cohérent avec V1 + V2-A + V2-B
+- ne renomme pas inutilement les concepts existants
+- propose une vraie structure frontend prête à coder
+- garde une UX sobre, pro, orientée gestion
+- respecte FeatureFlags + AppMode + rôles
+- pense aux permissions par caisse si pertinent
+- pense à la réutilisabilité des composants
+- si tu modifies une convention frontend existante, signale-la explicitement
+
+Commence maintenant.

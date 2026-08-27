@@ -1,0 +1,637 @@
+Nous continuons exactement le même projet de webapp de gestion de caisse.
+Tu dois rester strictement cohérent avec tout ce qui a déjà été défini et généré précédemment.
+
+# 1) CONTEXTE PROJET À RESPECTER
+
+## Stack
+- Backend : ASP.NET Core Web API
+- Frontend : React + TypeScript
+- Base locale : SQLite
+- Architecture backend :
+  - CashApp.Api
+  - CashApp.Application
+  - CashApp.Domain
+  - CashApp.Infrastructure
+  - CashApp.Shared
+
+## Architecture / conventions déjà existantes
+Le projet V1 existe déjà avec :
+- authentification
+- gestion simple des utilisateurs
+- gestion des caisses
+- ouverture / fermeture de caisse
+- saisie entrée / sortie
+- journal des opérations
+- catégories
+- dashboard simple
+- export Excel / PDF
+- historique minimal
+- sauvegarde base
+- settings / paramètres
+- système **AppMode + Feature Flags**
+
+## Modes applicatifs
+Le système possède un mode applicatif :
+- ESSENTIAL
+- INTERMEDIATE
+- ADVANCED
+
+## Feature flags
+Les modules sont activables / désactivables depuis les paramètres admin.
+La V2 doit s’intégrer à ce système, pas le remplacer.
+
+## Rôles
+- ADMIN
+- SUPERVISOR
+- CASHIER
+
+## Contrainte absolue
+La V2 est une **extension de la V1**.
+Tu ne dois pas réécrire toute l’application, mais **ajouter proprement les modules V2** sur la base existante.
+
+---
+
+# 2) OBJECTIF DE CE PROMPT V2-A
+
+Dans CE prompt, je veux que tu implémentes la **partie backend core de la V2**, c’est-à-dire les modules suivants :
+
+1. workflow de validation
+2. transferts inter-caisses
+3. dépôt banque
+4. anomalies / incidents
+5. gestion détaillée des écarts
+6. audit log / traçabilité renforcée
+7. renforcement du multi-caisses si nécessaire dans ces modules
+
+Je veux une réponse **prête à coder**, pas juste des idées.
+Je veux :
+- design métier
+- entités
+- enums
+- DTO
+- validators
+- interfaces de services
+- implémentations de services
+- ajustements des services V1 si nécessaire
+- DbContext / EF Core / configurations
+- controllers API
+- règles métier détaillées
+- seeds de settings / features V2 si utile
+
+Ne traite PAS dans ce prompt :
+- pièces jointes
+- import Excel/CSV
+- rapprochement
+- rapports avancés
+- frontend React détaillé
+Ces sujets seront traités dans les prompts suivants.
+
+---
+
+# 3) MODULES À IMPLÉMENTER DANS CE PROMPT
+
+---
+
+# 4) MODULE — WORKFLOW DE VALIDATION
+
+## Objectif
+Certaines actions sensibles ne doivent plus être définitives immédiatement.
+Je veux un workflow de validation configurable.
+
+## Cas métier à couvrir
+Le système doit permettre, selon paramétrage :
+- validation d’une opération au-delà d’un certain montant
+- validation d’un transfert inter-caisses
+- validation d’un dépôt banque
+- validation d’une clôture avec écart
+- validation d’une annulation d’opération
+- validation d’une réouverture éventuelle de session si tu prévois ce cas
+
+## Entités à créer
+- ApprovalRule
+- ApprovalRequest
+- ApprovalAction
+
+## Enums attendus
+- ApprovalTargetType
+- ApprovalStatus
+- ApprovalActionType si utile
+
+## Exemples de règles
+- toute sortie > 100000 nécessite validation
+- tout transfert nécessite validation
+- tout dépôt banque nécessite validation
+- tout écart > seuil nécessite justification et validation
+
+## Règles métier attendues
+- si une action nécessite validation, elle passe en `PENDING_APPROVAL`
+- tant qu’elle n’est pas approuvée, elle ne doit pas être considérée comme finalisée selon le cas
+- historiser :
+  - qui a demandé
+  - qui a approuvé / rejeté
+  - date
+  - commentaire
+- statuts minimum :
+  - PENDING
+  - APPROVED
+  - REJECTED
+  - CANCELLED
+
+## DTO minimum
+- ApprovalRuleDto
+- CreateApprovalRuleDto
+- UpdateApprovalRuleDto
+- ApprovalRequestListItemDto
+- ApprovalRequestDetailDto
+- ApproveRequestDto
+- RejectRequestDto
+
+## Validators minimum
+- CreateApprovalRuleDtoValidator
+- ApproveRequestDtoValidator
+- RejectRequestDtoValidator
+
+## Services attendus
+- IApprovalRuleService / ApprovalRuleService
+- IApprovalService / ApprovalService
+
+## API attendue
+### Approval rules
+- GET /api/approval-rules
+- POST /api/approval-rules
+- PUT /api/approval-rules/{id}
+- PATCH /api/approval-rules/{id}/status si utile
+
+### Approval requests
+- GET /api/approval-requests
+- GET /api/approval-requests/{id}
+- POST /api/approval-requests/{id}/approve
+- POST /api/approval-requests/{id}/reject
+
+---
+
+# 5) MODULE — TRANSFERTS INTER-CAISSES
+
+## Objectif
+Permettre de transférer des fonds d’une caisse à une autre avec traçabilité complète.
+
+## Entité
+- CashTransfer
+
+## Champs minimums
+- Id
+- TransferRef
+- SourceCashRegisterId
+- DestinationCashRegisterId
+- SourceSessionId si applicable
+- DestinationSessionId si applicable
+- Amount
+- CurrencyCode
+- TransferDate
+- Reason
+- Status
+- RequestedBy
+- ApprovedBy
+- ApprovedAt
+- CompletedAt
+- CreatedAt
+- UpdatedAt
+
+## Enum conseillé
+- CashTransferStatus :
+  - DRAFT
+  - PENDING_APPROVAL
+  - APPROVED
+  - REJECTED
+  - COMPLETED
+  - CANCELLED
+
+## Règles métier
+- caisse source obligatoire
+- caisse destination obligatoire
+- source != destination
+- montant > 0
+- contrôle d’accès sur les caisses
+- si validation requise :
+  - création en attente
+  - pas d’impact définitif avant approbation, sauf si tu proposes une autre stratégie clairement expliquée
+- à la finalisation :
+  - sortie sur caisse source
+  - entrée sur caisse destination
+  - possibilité d’utiliser des opérations miroir si c’est la stratégie retenue
+
+## DTO minimum
+- CashTransferListItemDto
+- CashTransferDetailDto
+- CreateCashTransferDto
+- ApproveCashTransferDto
+- RejectCashTransferDto
+
+## Validators
+- CreateCashTransferDtoValidator
+- ApproveCashTransferDtoValidator si utile
+- RejectCashTransferDtoValidator si utile
+
+## Service
+- ICashTransferService / CashTransferService
+
+## API
+- GET /api/cash-transfers
+- GET /api/cash-transfers/{id}
+- POST /api/cash-transfers
+- POST /api/cash-transfers/{id}/approve
+- POST /api/cash-transfers/{id}/reject
+- POST /api/cash-transfers/{id}/complete si nécessaire
+
+---
+
+# 6) MODULE — DÉPÔT BANQUE
+
+## Objectif
+Gérer les sorties de caisse vers la banque.
+
+## Entité
+- BankDeposit
+
+## Champs minimums
+- Id
+- DepositRef
+- CashRegisterId
+- CashSessionId si applicable
+- DepositDate
+- Amount
+- CurrencyCode
+- BankName
+- AccountReference
+- DepositSlipReference
+- Description
+- Status
+- RequestedBy
+- ApprovedBy
+- ApprovedAt
+- CreatedAt
+- UpdatedAt
+
+## Enum conseillé
+- BankDepositStatus :
+  - DRAFT
+  - PENDING_APPROVAL
+  - APPROVED
+  - REJECTED
+  - COMPLETED
+  - CANCELLED
+
+## Règles métier
+- caisse source obligatoire
+- montant > 0
+- date de dépôt
+- référence de dépôt
+- possibilité de validation selon feature/règle
+- impact sur la caisse via sortie
+- contrôle des droits par caisse
+
+## DTO minimum
+- BankDepositListItemDto
+- BankDepositDetailDto
+- CreateBankDepositDto
+- ApproveBankDepositDto
+- RejectBankDepositDto
+
+## Validators
+- CreateBankDepositDtoValidator
+- ApproveBankDepositDtoValidator si utile
+- RejectBankDepositDtoValidator si utile
+
+## Service
+- IBankDepositService / BankDepositService
+
+## API
+- GET /api/bank-deposits
+- GET /api/bank-deposits/{id}
+- POST /api/bank-deposits
+- POST /api/bank-deposits/{id}/approve
+- POST /api/bank-deposits/{id}/reject
+
+---
+
+# 7) MODULE — ANOMALIES / INCIDENTS
+
+## Objectif
+Gérer les anomalies détectées automatiquement ou déclarées manuellement.
+
+## Exemples
+- écart de caisse anormal
+- opération suspecte
+- transfert rejeté
+- dépôt rejeté
+- incohérence de session
+- différence entre solde théorique et physique
+
+## Entités
+- AnomalyCase
+- éventuellement AnomalyComment
+- éventuellement AnomalyAction
+
+## Champs minimums
+- Id
+- Reference
+- RelatedEntityType
+- RelatedEntityId
+- CashRegisterId
+- CashSessionId
+- Severity
+- Status
+- Title
+- Description
+- DetectedAt
+- DetectedBy
+- AssignedTo
+- ResolvedAt
+- ResolutionComment
+
+## Enums attendus
+- AnomalySeverity
+- AnomalyStatus
+
+## Règles métier
+- création manuelle ou automatique
+- statuts :
+  - OPEN
+  - IN_REVIEW
+  - RESOLVED
+  - CLOSED
+- affectation à un superviseur
+- historisation des actions si tu ajoutes commentaires/actions
+
+## DTO minimum
+- AnomalyListItemDto
+- AnomalyDetailDto
+- CreateAnomalyDto
+- ResolveAnomalyDto
+- AssignAnomalyDto
+
+## Validators
+- CreateAnomalyDtoValidator
+- ResolveAnomalyDtoValidator
+- AssignAnomalyDtoValidator
+
+## Service
+- IAnomalyService / AnomalyService
+
+## API
+- GET /api/anomalies
+- GET /api/anomalies/{id}
+- POST /api/anomalies
+- POST /api/anomalies/{id}/assign
+- POST /api/anomalies/{id}/resolve
+
+---
+
+# 8) MODULE — GESTION DÉTAILLÉE DES ÉCARTS
+
+## Objectif
+Quand une session est fermée avec un écart, je veux une gestion plus riche qu’un simple champ `VarianceAmount`.
+
+## Entités à prévoir
+- VarianceCase
+- VarianceAction
+- VarianceJustification
+
+## Cas à couvrir
+- écart positif / négatif
+- justification obligatoire au-delà d’un seuil
+- validation superviseur au-delà d’un seuil
+- suivi des actions correctives
+
+## Règles métier
+- si ABS(VarianceAmount) > seuil justification => justification obligatoire
+- si ABS(VarianceAmount) > seuil validation => approval request
+- possibilité d’ouvrir un dossier d’écart lié à la session
+
+## DTO minimum
+- VarianceCaseDto
+- CreateVarianceJustificationDto
+- VarianceActionDto
+
+## Validators
+- CreateVarianceJustificationDtoValidator
+
+## Service
+- IVarianceService / VarianceService
+
+## API
+- GET /api/variances
+- GET /api/variances/{id}
+- POST /api/variances/{id}/justify
+- ajoute d’autres endpoints si nécessaire, mais reste pragmatique
+
+---
+
+# 9) MODULE — AUDIT LOG / TRAÇABILITÉ RENFORCÉE
+
+## Objectif
+Tracer les actions sensibles de manière centralisée.
+
+## Entité
+- AuditLog
+
+## Champs minimums
+- Id
+- ActionType
+- EntityType
+- EntityId
+- PerformedBy
+- PerformedAt
+- Description
+- OldValuesJson
+- NewValuesJson
+- MetadataJson
+- IpAddress si utile
+
+## Actions à tracer au minimum
+- login
+- création / modification / annulation d’opération
+- ouverture / fermeture de caisse
+- création / approbation / rejet transfert
+- création / approbation / rejet dépôt
+- changement de settings
+- changement de feature
+- validation / rejet d’une demande
+- résolution d’anomalie
+
+## DTO minimum
+- AuditLogListItemDto
+- AuditLogDetailDto
+
+## Service
+- IAuditLogService / AuditLogService
+
+## API
+- GET /api/audit-logs
+- GET /api/audit-logs/{id}
+
+---
+
+# 10) MULTI-CAISSES ROBUSTE DANS LE BACKEND V2
+
+La V1 gérait déjà les utilisateurs et les caisses.
+Je veux que tu renforces les contrôles d’accès côté backend pour les modules V2.
+
+## À prévoir
+- helper ou service central pour vérifier si l’utilisateur a accès à une caisse
+- filtrage strict des listes par caisses autorisées
+- restriction création transfert / dépôt / anomalies si caisse non autorisée
+- comportement plus large pour SUPERVISOR / ADMIN selon règles cohérentes
+
+Je veux une logique factorisée, pas dupliquée partout.
+
+---
+
+# 11) SETTINGS / FEATURES V2 À AJOUTER
+
+Complète les settings et feature flags existants.
+
+## Feature codes minimum
+- ADV_VALIDATION
+- ADV_TRANSFERS
+- ADV_BANK_DEPOSITS
+- ADV_VARIANCE_MANAGEMENT
+- ADV_ANOMALIES
+- ADV_AUDIT_LOG
+
+## Settings V2 minimum
+- APPROVAL_REQUIRED_FOR_OPERATION_ABOVE
+- APPROVAL_REQUIRED_FOR_TRANSFER
+- APPROVAL_REQUIRED_FOR_BANK_DEPOSIT
+- VARIANCE_JUSTIFICATION_THRESHOLD
+- VARIANCE_APPROVAL_THRESHOLD
+- AUTO_CREATE_ANOMALY_ON_LARGE_VARIANCE
+- AUTO_CREATE_ANOMALY_ON_REJECTED_TRANSFER
+- AUTO_CREATE_ANOMALY_ON_REJECTED_DEPOSIT
+
+Tu peux compléter la liste si c’est utile, mais reste pragmatique.
+
+---
+
+# 12) AJUSTEMENTS SERVICES V1 À PRÉVOIR
+
+Je veux que tu adaptes si nécessaire les services V1 existants :
+- CashOperationService
+- CashSessionService
+- SettingsService
+- FeatureService
+- DashboardService
+
+## Exemples attendus
+### CashOperationService
+- si une règle de validation s’applique, créer une demande d’approbation
+- possibilité d’un statut en attente selon la stratégie retenue
+
+### CashSessionService
+- si fermeture avec gros écart :
+  - justification obligatoire
+  - création VarianceCase
+  - création ApprovalRequest si nécessaire
+  - création AnomalyCase si nécessaire
+
+### SettingsService / FeatureService
+- prise en charge des nouveaux settings / features V2
+
+---
+
+# 13) DB / EF CORE / MIGRATIONS
+
+Je veux les ajustements complets :
+- entités domain
+- DbSet dans AppDbContext
+- configurations EF Core
+- indexes
+- contraintes
+- relations
+- seed features / settings V2 si utile
+
+Je veux que tu précises :
+- clés étrangères
+- contraintes d’unicité importantes
+- index de recherche utiles
+- conventions de suppression (cascade ou restrict)
+
+---
+
+# 14) CE QUE JE VEUX EN SORTIE
+
+Réponds dans cet ordre exact :
+
+## PARTIE A — Vue d’ensemble backend V2-A
+- architecture globale des modules backend de ce prompt
+- comment ils s’intègrent à la V1
+- principes de validation / statut / traçabilité
+
+## PARTIE B — Arborescence backend à ajouter / modifier
+- nouveaux dossiers
+- nouveaux fichiers
+- fichiers V1 à ajuster
+
+## PARTIE C — Domain model V2-A
+- entités
+- enums
+- feature codes
+- settings keys
+- relations
+Je veux du vrai code C# pour les entités principales.
+
+## PARTIE D — EF Core / DbContext / configurations
+- DbSet
+- configurations
+- index / contraintes
+- seeds utiles
+
+## PARTIE E — DTO
+Tous les DTO par module.
+
+## PARTIE F — Validators
+Tous les validators FluentValidation.
+
+## PARTIE G — Interfaces des services
+Toutes les interfaces des services V2-A.
+
+## PARTIE H — Implémentations des services
+Je veux du vrai code C# ou une version initiale très concrète pour :
+- ApprovalRuleService
+- ApprovalService
+- CashTransferService
+- BankDepositService
+- AnomalyService
+- VarianceService
+- AuditLogService
++ ajustements des services V1 concernés
+
+## PARTIE I — Controllers API
+Code des controllers REST.
+
+## PARTIE J — Règles métier transverses et scénarios
+Explique précisément les flux suivants :
+1. opération nécessitant validation
+2. transfert inter-caisses soumis à validation
+3. dépôt banque soumis à validation
+4. clôture de session avec gros écart
+5. création automatique d’anomalie
+6. écriture audit log sur action sensible
+
+## PARTIE K — Migrations / seed / points d’attention
+- ce qu’il faut ajouter pour rendre cette partie V2 démarrable
+
+---
+
+# 15) CONTRAINTES DE QUALITÉ
+
+- reste strictement cohérent avec l’architecture déjà définie
+- ne renomme pas inutilement les concepts existants
+- fais du code / de la vraie structure, pas juste des idées
+- garde les controllers fins
+- mets les règles métier dans les services
+- respecte AppMode + FeatureFlags
+- pense sécurité / rôles / multi-caisses / traçabilité
+- si tu introduis une convention nouvelle, signale-la explicitement
+
+Commence maintenant.

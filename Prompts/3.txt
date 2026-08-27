@@ -1,0 +1,411 @@
+Nous continuons le même projet de webapp de gestion de caisse.
+Tu dois rester **strictement cohérent** avec le backend déjà défini : entités, DTO, routes API, rôles, app mode, feature codes, settings, modules V1/V2.
+
+# OBJECTIF DE CE PROMPT
+Je veux maintenant que tu me génères le **frontend React TypeScript complet de base**, prêt à coder, structuré, propre et cohérent avec l’API.
+
+Je veux :
+1. architecture frontend complète
+2. client API Axios
+3. auth store
+4. récupération du user courant
+5. stockage token / user / features / appMode / caisses autorisées
+6. routing complet
+7. layouts
+8. FeatureGuard
+9. menu dynamique par rôles + features
+10. pages V1
+11. composants réutilisables
+12. hooks principaux
+13. pages settings avec mode V1/V2 + modules activables
+14. design / structure UI des pages principales
+
+Je veux **du vrai code TypeScript/React**, pas seulement des idées.
+
+---
+
+# 1) STACK FRONTEND IMPOSÉE
+
+- React
+- TypeScript
+- React Router
+- TanStack Query
+- React Hook Form
+- Zod
+- Material UI
+- Axios
+
+---
+
+# 2) ARCHITECTURE FRONTEND SOUHAITÉE
+
+Je veux une structure de ce type :
+
+frontend/cashapp-web/
+├─ src/
+│  ├─ app/
+│  │  ├─ providers/
+│  │  ├─ router/
+│  │  └─ store/
+│  ├─ api/
+│  ├─ auth/
+│  ├─ components/
+│  │  ├─ common/
+│  │  ├─ layout/
+│  │  ├─ forms/
+│  │  ├─ tables/
+│  │  ├─ dialogs/
+│  │  └─ feedback/
+│  ├─ modules/
+│  │  ├─ dashboard/
+│  │  ├─ users/
+│  │  ├─ cash-registers/
+│  │  ├─ cash-sessions/
+│  │  ├─ cash-operations/
+│  │  ├─ categories/
+│  │  ├─ exports/
+│  │  ├─ backups/
+│  │  ├─ settings/
+│  │  └─ feature-management/
+│  ├─ pages/
+│  ├─ hooks/
+│  ├─ types/
+│  ├─ utils/
+│  └─ theme/
+
+Je veux conserver cette logique :
+- `pages/` = pages routées
+- `modules/` = logique métier par domaine
+- `components/` = composants réutilisables
+
+---
+
+# 3) AUTH FRONTEND
+
+Je veux un système d’authentification propre avec :
+- page login
+- appel POST `/api/auth/login`
+- récupération GET `/api/auth/me`
+- stockage du token JWT
+- stockage du user courant
+- stockage du `appMode`
+- stockage des `features`
+- stockage des `cashRegisters` autorisées
+
+Je veux un **auth store** léger (Zustand si tu le juges pertinent, sinon Context + hooks, mais choisis une solution simple et propre).
+
+Le store doit contenir :
+- token
+- user
+- features
+- appMode
+- cashRegisters autorisées
+- isAuthenticated
+- actions login / logout / bootstrapMe
+
+---
+
+# 4) ROUTES FRONTEND À PRÉVOIR
+
+Je veux les pages routées suivantes :
+
+- /login
+- /dashboard
+- /users
+- /users/new
+- /users/:id/edit
+- /cash-registers
+- /cash-registers/new
+- /cash-registers/:id/edit
+- /cash-sessions
+- /cash-sessions/:id
+- /cash-operations
+- /cash-operations/new
+- /cash-operations/:id/edit
+- /cash-operations/:id
+- /categories
+- /exports
+- /backups
+- /settings/general
+- /settings/app-mode
+- /settings/features
+
+Je veux :
+- `ProtectedRoute`
+- redirection login si non connecté
+- gestion 403 si feature non active
+- gestion route introuvable
+
+---
+
+# 5) COMPOSANTS RÉUTILISABLES À GÉNÉRER
+
+Je veux au minimum les composants suivants :
+
+## layout
+- AppLayout
+- AuthLayout
+- Sidebar
+- Topbar
+- PageContainer
+
+## common
+- PageHeader
+- StatCard
+- StatusChip
+- CurrencyDisplay
+- FeatureGuard
+- PermissionGuard si utile
+- EmptyState
+- LoadingScreen
+
+## dialogs
+- ConfirmDialog
+- OpenSessionDialog
+- CloseSessionDialog
+
+## forms
+- AppTextField
+- AppSelect
+- AppCurrencyField
+- AppDateField
+- AppSwitchField
+
+## tables
+- AppTable
+- éventuellement une config de colonnes réutilisable
+
+---
+
+# 6) FEATURE GUARD / MENU DYNAMIQUE
+
+Je veux un mécanisme `FeatureGuard` qui permet :
+- de masquer un menu
+- de masquer un bouton
+- de masquer une section
+- de bloquer une page si la feature n’est pas activée
+
+Je veux aussi un système de **menu dynamique** basé sur :
+- les rôles
+- les features activées
+- éventuellement le mode applicatif
+
+Exemples :
+- si `CORE_USERS` désactivé, le menu Users disparaît
+- si `CORE_BACKUP` désactivé, Backups disparaît
+- si `ADV_BANK_DEPOSITS` absent, la page de dépôt banque n’existe pas ou est cachée
+
+---
+
+# 7) PAGES À GÉNÉRER EN V1
+
+Je veux les pages/squelettes fonctionnels suivants :
+
+## LoginPage
+- formulaire login
+- validation
+- appel API
+- redirection dashboard
+
+## DashboardPage
+- KPI
+- session active
+- stats du jour
+- raccourcis
+
+## UsersListPage
+- tableau utilisateurs
+- bouton créer
+- activer / désactiver
+
+## UserFormPage
+- create / edit user
+- affectation aux caisses
+
+## CashRegistersListPage
+- liste des caisses
+- create / edit
+- statut actif/inactif
+
+## CategoriesPage
+- liste + create/edit catégories
+
+## CashSessionsListPage
+- liste des sessions
+- bouton ouvrir session
+- bouton fermer session si ouverte
+
+## CashSessionDetailPage
+- détail session
+- opérations liées
+- solde théorique / physique / écart
+
+## CashOperationsListPage
+- filtres simples
+- tableau opérations
+- actions voir / modifier / annuler
+
+## CashOperationFormPage
+- create / edit opération
+- choix caisse/session/catégorie/direction
+
+## ExportsPage
+- boutons export opérations / sessions / état de caisse
+
+## BackupsPage
+- liste backups
+- bouton créer sauvegarde
+- bouton restaurer
+
+## GeneralSettingsPage
+- devise
+- options d’édition / backup
+
+## AppModeSettingsPage
+- choix mode ESSENTIAL / INTERMEDIATE / ADVANCED
+
+## FeatureSettingsPage
+- liste des modules activables
+- switch on/off
+- message d’impact éventuel
+
+---
+
+# 8) TYPES FRONTEND À PRÉVOIR
+
+Je veux des types TS cohérents avec les DTO backend pour :
+- Auth
+- User
+- CashRegister
+- Category
+- CashSession
+- CashOperation
+- Dashboard
+- FeatureSetting
+- GeneralSettings
+- AppMode
+- ExportFile
+- Backup
+
+---
+
+# 9) API FRONTEND À STRUCTURER
+
+Je veux un client API Axios + des services ou fichiers API par module :
+- authApi.ts
+- usersApi.ts
+- cashRegistersApi.ts
+- categoriesApi.ts
+- cashSessionsApi.ts
+- cashOperationsApi.ts
+- dashboardApi.ts
+- settingsApi.ts
+- backupsApi.ts
+- exportsApi.ts
+
+Je veux :
+- interceptors auth
+- injection du token
+- gestion 401 → logout ou redirection
+- base URL configurable
+
+---
+
+# 10) UI / DESIGN À RESPECTER
+
+Je veux une interface **sobre, professionnelle, orientée gestion** :
+- sidebar fixe
+- topbar
+- dashboard lisible
+- tableaux clairs
+- cartes KPI
+- dialogues propres pour ouvrir / fermer caisse
+- couleurs sobres : bleu / gris / vert / orange / rouge
+
+Je veux une logique UI claire pour :
+- dashboard
+- opérations
+- sessions
+- settings
+
+---
+
+# 11) FORMAT DE TA RÉPONSE
+
+Je veux que tu répondes dans cet ordre :
+
+## PARTIE A — Vue d’ensemble frontend
+- architecture frontend
+- stratégie auth
+- stratégie feature guard
+- stratégie menu dynamique
+
+## PARTIE B — Arborescence frontend détaillée
+Donne l’arborescence complète.
+
+## PARTIE C — Types frontend
+Donne les types TS principaux.
+
+## PARTIE D — API client
+Donne le code de :
+- api/client.ts
+- interceptors
+- api par module principaux
+
+## PARTIE E — Auth store
+Je veux le code complet du store auth + hooks utiles.
+
+## PARTIE F — Router
+Je veux :
+- router principal
+- ProtectedRoute
+- route guard
+- gestion 403 / 404
+
+## PARTIE G — Layout / composants communs
+Je veux le code de :
+- AppLayout
+- Sidebar
+- Topbar
+- PageHeader
+- StatCard
+- StatusChip
+- FeatureGuard
+- ConfirmDialog
+- AppTable (version initiale)
+
+## PARTIE H — Pages V1
+Je veux le squelette réel des pages principales :
+- LoginPage
+- DashboardPage
+- UsersListPage
+- UserFormPage
+- CashRegistersListPage
+- CategoriesPage
+- CashSessionsListPage
+- CashSessionDetailPage
+- CashOperationsListPage
+- CashOperationFormPage
+- ExportsPage
+- BackupsPage
+- GeneralSettingsPage
+- AppModeSettingsPage
+- FeatureSettingsPage
+
+## PARTIE I — Hooks / patterns
+Donne les hooks utiles (useCurrentUser, useFeatures, etc.) si pertinent.
+
+## PARTIE J — Ce qu’il restera à finaliser
+Liste les points restants (styles fins, pages V2, etc.)
+
+---
+
+# 12) CONTRAINTES DE QUALITÉ
+
+- Donne du vrai code TypeScript / React
+- Garde une cohérence stricte avec le backend
+- Ne fais pas un frontend “jouet”
+- Si un fichier est trop long, donne une version initiale cohérente
+- Le code doit être structuré pour être maintenable
+
+Commence maintenant.

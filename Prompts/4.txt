@@ -1,0 +1,249 @@
+Nous continuons exactement le même projet de webapp de gestion de caisse.
+Tu dois rester strictement cohérent avec :
+- le backend core déjà généré
+- les services métier / controllers déjà générés
+- le frontend déjà généré
+- les entités, DTO, routes API, features, settings, rôles, app mode déjà définis
+
+# OBJECTIF DE CE PROMPT
+Je veux maintenant la **phase de finalisation du projet** :
+1. exports plus concrets
+2. backup / restore plus détaillé
+3. scripts de migration / initialisation
+4. README de démarrage
+5. plan de build / run
+6. structure de tests
+7. garde-fous V2 / extensibilité
+8. recommandations techniques finales
+9. checklist de mise en route
+
+Je veux quelque chose de **très pratique**, pas seulement théorique.
+
+---
+
+# 1) EXPORTS À FINALISER
+
+Je veux une proposition réaliste pour les exports V1 :
+- export opérations Excel
+- export opérations PDF
+- export sessions Excel
+- export sessions PDF
+- export état de caisse PDF
+
+Je veux que tu précises :
+- bibliothèque .NET recommandée
+- structure de service
+- nommage des fichiers exportés
+- colonnes exportées
+- formatage des montants / dates
+- exemple de code de génération minimal si possible
+
+Si tu ne peux pas tout détailler, donne au moins :
+- une implémentation de base propre
+- les interfaces
+- les modèles de sortie
+- les endpoints déjà raccordés
+
+---
+
+# 2) BACKUP / RESTORE À FINALISER
+
+La base étant SQLite locale, je veux un mécanisme propre pour :
+- créer une sauvegarde physique du fichier `.db`
+- journaliser la sauvegarde
+- restaurer une sauvegarde
+- sécuriser la restauration par rôle admin
+
+Je veux :
+- la stratégie de chemin de stockage
+- la gestion du nom de fichier
+- la validation de l’existence du backup
+- les points de vigilance lors de la restauration
+- le code de base si nécessaire
+
+Je veux aussi une réflexion sur :
+- sauvegarde manuelle
+- auto-backup potentiel plus tard
+- backup après fermeture de session si activé par setting
+
+---
+
+# 3) MIGRATIONS / INITIALISATION / DÉMARRAGE
+
+Je veux que tu me proposes la stratégie de démarrage complète du projet :
+
+## backend
+- création solution
+- création projets
+- références entre projets
+- packages NuGet à installer
+- commande EF Core migrations
+- création de la base SQLite
+- lancement API
+
+## frontend
+- création app React
+- packages npm à installer
+- structure des dossiers
+- configuration axios / env
+- lancement frontend
+
+Je veux aussi :
+- les commandes CLI recommandées
+- l’ordre exact de mise en place
+- un exemple de `.env` frontend si nécessaire
+- un exemple de `appsettings.Development.json` backend si utile
+
+---
+
+# 4) README PROJET
+
+Je veux que tu me génères un **README.md initial complet** pour ce projet, incluant :
+- présentation du projet
+- stack
+- architecture
+- modules V1
+- mode V1/V2 + features
+- prérequis
+- installation backend
+- installation frontend
+- lancement
+- seed admin
+- structure des rôles
+- notes SQLite backup
+- roadmap V2
+
+Je veux un README propre, professionnel, directement réutilisable.
+
+---
+
+# 5) TESTS À PRÉVOIR
+
+Je veux une proposition de structure de tests :
+
+## Backend tests
+- tests services métier
+- tests de règles d’ouverture / fermeture / opérations
+- tests de FeatureService
+- tests AuthService
+- tests de calcul de solde théorique
+
+## API tests
+- login
+- ouverture session
+- création opération
+- fermeture session
+
+Je veux :
+- l’arborescence des tests
+- les priorités de tests
+- quelques exemples de cas de test
+- éventuellement un exemple de test xUnit si pertinent
+
+---
+
+# 6) EXTENSIBILITÉ V2
+
+Je veux que tu m’expliques comment raccorder proprement la V2 à l’architecture actuelle, notamment pour :
+- workflow de validation
+- transferts inter-caisses
+- dépôt banque
+- pièces jointes
+- anomalies
+- rapports avancés
+- import Excel/CSV
+- rapprochement / matching
+- gestion détaillée des écarts
+- audit log
+
+Je ne veux pas forcément tout le code, mais je veux :
+- où placer les futures entités
+- quels services créer
+- quels endpoints prévoir
+- quelles dépendances de features utiliser
+- comment brancher ces modules sur le système mode V1/V2 + modules activables
+
+---
+
+# 7) PLAN DE LIVRAISON RECOMMANDÉ
+
+Je veux un plan de livraison réaliste en étapes :
+
+## Sprint 1
+- backend core
+- auth
+- users
+- cash registers
+- categories
+
+## Sprint 2
+- cash sessions
+- cash operations
+- dashboard
+
+## Sprint 3
+- settings
+- features
+- backups
+- exports
+
+## Sprint 4
+- stabilisation
+- tests
+- UI polish
+- préparation V2
+
+Tu peux l’améliorer, mais garde une logique réaliste.
+
+---
+
+# 8) FORMAT DE TA RÉPONSE
+
+Je veux que tu répondes dans cet ordre :
+
+## PARTIE A — Finalisation exports
+- stratégie
+- implémentation de base
+- exemples de structures / fichiers / endpoints
+
+## PARTIE B — Finalisation backup / restore
+- stratégie
+- règles
+- code / pseudo-code concret si nécessaire
+
+## PARTIE C — Installation complète du projet
+- backend
+- frontend
+- packages
+- commandes
+- migrations
+- lancement
+
+## PARTIE D — README.md complet
+Je veux le contenu du README.
+
+## PARTIE E — Tests
+- structure
+- priorités
+- exemples
+
+## PARTIE F — Roadmap V2 branchée sur l’architecture actuelle
+- modules
+- services
+- endpoints
+- features
+
+## PARTIE G — Checklist de mise en route
+Je veux une checklist finale “de 0 à projet qui tourne”.
+
+---
+
+# 9) CONTRAINTES DE QUALITÉ
+
+- reste concret et exploitable
+- évite les généralités vagues
+- garde une cohérence stricte avec tout ce qui a déjà été généré
+- si tu proposes une lib d’export ou de PDF, explique pourquoi
+- privilégie la simplicité robuste compatible MVP
+
+Commence maintenant.

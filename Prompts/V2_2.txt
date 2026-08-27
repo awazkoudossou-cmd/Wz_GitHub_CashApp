@@ -1,0 +1,515 @@
+Nous continuons exactement le même projet de webapp de gestion de caisse.
+Tu dois rester strictement cohérent avec tout ce qui a déjà été défini et généré précédemment, y compris le backend V2-A déjà produit.
+
+# 1) CONTEXTE PROJET À RESPECTER
+
+## Stack
+- Backend : ASP.NET Core Web API
+- Frontend : React + TypeScript
+- Base locale : SQLite
+- Architecture backend :
+  - CashApp.Api
+  - CashApp.Application
+  - CashApp.Domain
+  - CashApp.Infrastructure
+  - CashApp.Shared
+
+## Base V1 déjà existante
+- auth
+- users
+- cash registers
+- cash sessions
+- cash operations
+- categories
+- dashboard simple
+- exports
+- backups
+- settings
+- feature flags
+
+## Base V2-A déjà ajoutée
+La V2-A a déjà introduit :
+- workflow de validation
+- transferts inter-caisses
+- dépôt banque
+- anomalies
+- gestion détaillée des écarts
+- audit log
+- renforcement multi-caisses backend
+
+Tu dois **réutiliser ces modules**, pas les réinventer.
+
+## Modes applicatifs
+- ESSENTIAL
+- INTERMEDIATE
+- ADVANCED
+
+## Rôles
+- ADMIN
+- SUPERVISOR
+- CASHIER
+
+## Contrainte absolue
+La V2 reste une **extension de la V1**.
+Tout ce que tu ajoutes ici doit s’intégrer proprement à la V1 + V2-A.
+
+---
+
+# 2) OBJECTIF DE CE PROMPT V2-B
+
+Dans CE prompt, je veux que tu implémentes la **partie backend complémentaire de la V2**, c’est-à-dire :
+
+1. pièces jointes
+2. import Excel / CSV
+3. rapprochement / matching
+4. rapports avancés
+5. ajustements transverses des services existants si nécessaire
+
+Je veux une réponse **prête à coder**, avec :
+- design métier
+- entités
+- enums
+- DTO
+- validators
+- services
+- ajustements EF Core / DbContext
+- controllers API
+- interactions avec V1 et V2-A
+
+Ne traite PAS ici :
+- frontend React détaillé
+- auth V1
+- réécriture des modules déjà couverts dans V2-A
+Tu peux cependant les **référencer** pour brancher correctement les nouveaux modules.
+
+---
+
+# 3) MODULE — PIÈCES JOINTES
+
+## Objectif
+Permettre d’attacher des fichiers aux opérations, transferts, dépôts, anomalies, validations, imports, etc.
+
+## Contrainte importante
+Le projet utilise SQLite locale.
+Je veux une stratégie simple et robuste :
+- **fichiers stockés sur disque local**
+- **métadonnées en base**
+
+## Entité
+- Attachment
+
+## Champs minimums
+- Id
+- FileName
+- OriginalFileName
+- ContentType
+- FileSize
+- StoragePath
+- EntityType
+- EntityId
+- UploadedBy
+- UploadedAt
+- Description
+
+## Règles métier
+- whitelist d’extensions
+- taille max configurable
+- nom de fichier sécurisé
+- stockage dans un répertoire applicatif configurable
+- possibilité d’attacher à plusieurs types d’entités
+- suppression logique ou physique selon la stratégie que tu choisis, mais explique-la
+
+## DTO minimum
+- AttachmentDto
+- UploadAttachmentResponseDto
+
+## Service
+- IAttachmentService / AttachmentService
+
+## API
+- GET /api/attachments/{entityType}/{entityId}
+- POST /api/attachments/upload
+- GET /api/attachments/{id}/download
+- DELETE /api/attachments/{id}
+
+## Intégrations attendues
+Le module attachments doit pouvoir être utilisé par :
+- CashOperation
+- CashTransfer
+- BankDeposit
+- ApprovalRequest
+- AnomalyCase
+- ImportBatch
+- ReconciliationBatch si pertinent
+
+---
+
+# 4) MODULE — IMPORT EXCEL / CSV
+
+## Objectif
+Permettre l’import de données en masse.
+
+## Imports à prévoir
+Au minimum :
+- import d’opérations de caisse
+- import de catégories si tu juges utile
+Tu peux structurer le système pour accueillir d’autres imports plus tard.
+
+## Entités
+- ImportBatch
+- ImportBatchLine
+
+## Enums attendus
+- ImportBatchType
+- ImportBatchStatus
+- ImportLineStatus
+
+## Champs attendus côté ImportBatch
+- Id
+- BatchRef
+- BatchType
+- OriginalFileName
+- UploadedAt
+- UploadedBy
+- Status
+- TotalLines
+- ValidLines
+- InvalidLines
+- ImportedLines
+- ErrorSummaryJson si utile
+
+## Champs attendus côté ImportBatchLine
+- Id
+- ImportBatchId
+- LineNumber
+- RawDataJson
+- ParsedDataJson
+- Status
+- ErrorMessage
+- CreatedEntityType
+- CreatedEntityId
+
+## Règles métier
+- upload fichier
+- lecture / parsing
+- preview avant import
+- validation ligne par ligne
+- stratégie configurable :
+  - import partiel possible
+  - ou rejet global
+- journaliser les erreurs
+- les opérations importées doivent passer par la validation métier existante
+- prise en compte des règles V2-A :
+  - validation
+  - anomalies
+  - audit log
+  - multi-caisses
+
+## DTO minimum
+- ImportBatchListItemDto
+- ImportBatchDetailDto
+- ImportPreviewDto
+- ImportPreviewLineDto
+- ConfirmImportDto
+
+## Validators
+- ConfirmImportDtoValidator
+
+## Service
+- IImportService / ImportService
+
+## API
+- GET /api/import-batches
+- GET /api/import-batches/{id}
+- POST /api/import-batches/upload
+- POST /api/import-batches/{id}/preview
+- POST /api/import-batches/{id}/confirm
+
+## Point important
+Je veux une architecture de parsing extensible.
+Par exemple :
+- interface de parser
+- parser CSV opérations
+- parser Excel opérations
+- mapping de colonnes
+- validation métier séparée du parsing brut
+
+---
+
+# 5) MODULE — RAPPROCHEMENT / MATCHING
+
+## Objectif
+Permettre de rapprocher des mouvements de caisse avec d’autres éléments de référence.
+
+## Cas d’usage à couvrir
+- rapprocher un dépôt banque avec les opérations de sortie correspondantes
+- rapprocher des opérations importées avec des opérations saisies
+- rapprocher des justificatifs / écarts si besoin
+
+## Entités
+- ReconciliationBatch
+- ReconciliationItem
+
+## Enums attendus
+- ReconciliationBatchType
+- ReconciliationStatus
+
+## Champs minimums ReconciliationBatch
+- Id
+- Reference
+- BatchType
+- CashRegisterId si applicable
+- CreatedAt
+- CreatedBy
+- Status
+- Notes
+
+## Champs minimums ReconciliationItem
+- Id
+- ReconciliationBatchId
+- LeftEntityType
+- LeftEntityId
+- RightEntityType
+- RightEntityId
+- MatchedAmount
+- MatchStatus
+- Notes
+
+## Règles métier
+- création d’un batch de rapprochement
+- sélection des éléments à rapprocher
+- matching manuel minimum
+- possibilité d’un matching semi-automatique si tu peux le proposer proprement
+- calcul des écarts de rapprochement
+- pas de rapprochement incohérent ou dupliqué
+- journaliser les actions importantes
+- respecter les droits multi-caisses
+
+## DTO minimum
+- ReconciliationBatchListItemDto
+- ReconciliationBatchDetailDto
+- CreateReconciliationBatchDto
+- ReconcileItemsDto
+
+## Validators
+- CreateReconciliationBatchDtoValidator
+- ReconcileItemsDtoValidator
+
+## Service
+- IReconciliationService / ReconciliationService
+
+## API
+- GET /api/reconciliation-batches
+- GET /api/reconciliation-batches/{id}
+- POST /api/reconciliation-batches
+- POST /api/reconciliation-batches/{id}/match
+
+---
+
+# 6) MODULE — RAPPORTS AVANCÉS
+
+## Objectif
+Fournir des rapports plus riches que le dashboard V1.
+
+## Rapports à couvrir au minimum
+1. rapport par caisse sur période
+2. rapport par catégorie sur période
+3. rapport des écarts
+4. rapport des transferts
+5. rapport des dépôts banque
+6. rapport des anomalies
+7. rapport des validations
+
+## Contraintes
+Les rapports doivent s’appuyer sur :
+- opérations
+- sessions
+- transferts
+- dépôts
+- anomalies
+- approvals
+- variances
+selon les données disponibles
+
+## DTO minimum
+### Filtres
+- CashReportFilterDto
+- CategoryReportFilterDto
+- VarianceReportFilterDto
+- TransferReportFilterDto
+- DepositReportFilterDto
+- AnomalyReportFilterDto
+- ApprovalReportFilterDto
+
+### Résultats
+- CashReportRowDto
+- CategoryReportRowDto
+- VarianceReportRowDto
+- TransferReportRowDto
+- DepositReportRowDto
+- AnomalyReportRowDto
+- ApprovalReportRowDto
+
+Tu peux aussi prévoir des DTO de résumé / agrégats si c’est utile.
+
+## Service
+- IAdvancedReportService / AdvancedReportService
+
+## API
+- GET /api/reports/cash
+- GET /api/reports/categories
+- GET /api/reports/variances
+- GET /api/reports/transfers
+- GET /api/reports/deposits
+- GET /api/reports/anomalies
+- GET /api/reports/approvals
+
+## Attentes
+- filtres de période
+- filtres par caisse
+- filtres par statut si pertinent
+- agrégations propres
+- pagination si utile
+- export réutilisable avec l’existant si possible
+
+---
+
+# 7) FEATURE FLAGS / SETTINGS V2 À AJOUTER DANS CE PROMPT
+
+## Feature codes minimum
+- ADV_ATTACHMENTS
+- ADV_IMPORTS
+- ADV_RECONCILIATION
+- ADV_ADVANCED_REPORTS
+
+## Settings minimum
+- ALLOWED_ATTACHMENT_EXTENSIONS
+- MAX_ATTACHMENT_SIZE_MB
+- ATTACHMENTS_ROOT_PATH
+- IMPORT_ALLOW_PARTIAL_SUCCESS
+- IMPORT_DEFAULT_DATE_FORMAT si utile
+- IMPORT_DEFAULT_DECIMAL_SEPARATOR si utile
+
+Tu peux compléter si nécessaire, mais reste pragmatique.
+
+---
+
+# 8) INTERACTIONS TRANSVERSES À RESPECTER
+
+Je veux que les nouveaux modules s’intègrent aux modules V1 et V2-A.
+
+## Attachments
+- pouvoir lier des pièces aux opérations, transferts, dépôts, anomalies, validations, imports
+
+## ImportService
+- les opérations importées doivent passer dans le moteur métier existant
+- si une opération importée déclenche une validation, il faut créer l’ApprovalRequest
+- si elle crée une anomalie, il faut l’enregistrer
+- audit log sur import / confirmation / échec important
+
+## ReconciliationService
+- peut utiliser BankDeposit, CashOperation, ImportBatchLine, VarianceCase selon les cas
+- journaliser les actions importantes
+
+## AdvancedReportService
+- s’appuie sur les modules V1 + V2-A + V2-B
+
+---
+
+# 9) DB / EF CORE / MIGRATIONS
+
+Je veux :
+- nouvelles entités Domain
+- DbSet à ajouter
+- configurations EF Core
+- indexes / contraintes
+- relations
+- seed features / settings V2-B si utile
+
+Précise :
+- contraintes d’unicité
+- indexes de recherche
+- conventions de suppression
+- types de colonnes si utile
+
+---
+
+# 10) CE QUE JE VEUX EN SORTIE
+
+Réponds dans cet ordre exact :
+
+## PARTIE A — Vue d’ensemble backend V2-B
+- rôle des modules de ce prompt
+- comment ils s’intègrent à V1 + V2-A
+- principes de stockage fichiers / parsing / rapprochement / reporting
+
+## PARTIE B — Arborescence backend à ajouter / modifier
+- nouveaux dossiers
+- nouveaux fichiers
+- fichiers existants à ajuster
+
+## PARTIE C — Domain model V2-B
+- entités
+- enums
+- feature codes
+- settings keys
+- relations
+Je veux du vrai code C# pour les entités principales.
+
+## PARTIE D — EF Core / DbContext / configurations
+- DbSet
+- configurations
+- index / contraintes
+- seeds utiles
+
+## PARTIE E — DTO
+Tous les DTO par module.
+
+## PARTIE F — Validators
+Tous les validators nécessaires.
+
+## PARTIE G — Interfaces des services
+- IAttachmentService
+- IImportService
+- IReconciliationService
+- IAdvancedReportService
++ éventuelles interfaces de parser/import
+
+## PARTIE H — Implémentations des services
+Je veux du vrai code C# ou une version initiale très concrète pour :
+- AttachmentService
+- ImportService
+- parser / pipeline d’import
+- ReconciliationService
+- AdvancedReportService
+
+## PARTIE I — Controllers API
+Code des controllers REST de ce prompt.
+
+## PARTIE J — Règles métier transverses et scénarios
+Explique précisément les flux suivants :
+1. upload d’une pièce jointe sur un dépôt banque
+2. import d’opérations avec preview puis confirmation
+3. import partiel avec erreurs ligne par ligne
+4. création d’un batch de rapprochement
+5. rapprochement manuel d’un dépôt avec des opérations
+6. génération d’un rapport avancé par caisse
+
+## PARTIE K — Migrations / seed / points d’attention
+- ce qu’il faut ajouter pour rendre cette partie V2 démarrable
+
+---
+
+# 11) CONTRAINTES DE QUALITÉ
+
+- reste strictement cohérent avec V1 et V2-A
+- ne renomme pas inutilement les concepts existants
+- fais du code / de la vraie structure
+- garde les controllers fins
+- mets la logique métier dans les services
+- pense aux accès multi-caisses
+- pense à la traçabilité via AuditLog
+- pense à la robustesse SQLite + stockage local fichiers
+- si tu introduis une convention nouvelle, signale-la explicitement
+
+Commence maintenant.

@@ -1,0 +1,438 @@
+Nous poursuivons exactement le même projet de webapp de gestion de caisse.
+
+IMPORTANT :
+Le backend V1 et V2 sont déjà implémentés.
+
+Tu ne dois PAS réécrire le module de transfert.
+Tu dois uniquement le faire évoluer.
+
+L'objectif est de rendre les transferts cohérents avec le fonctionnement global de l'application.
+
+====================================================
+CONTEXTE
+====================================================
+
+Stack :
+
+- ASP.NET Core Web API
+- React + TypeScript
+- SQLite
+- EF Core
+
+Architecture :
+
+- CashApp.Api
+- CashApp.Application
+- CashApp.Domain
+- CashApp.Infrastructure
+- CashApp.Shared
+
+Les modules suivants existent déjà :
+
+- Authentification
+- Utilisateurs
+- Caisses
+- Sessions de caisse
+- CashOperation
+- CashTransfer
+- Workflow de validation
+- AuditLog
+- Dashboard
+- FeatureFlags
+- AppMode
+
+====================================================
+PROBLEME A CORRIGER
+====================================================
+
+Aujourd'hui le module CashTransfer représente seulement le document métier du transfert.
+
+Je veux maintenant que les impacts financiers soient enregistrés sous forme d'opérations de caisse.
+
+Autrement dit :
+
+UN TRANSFERT NE MODIFIE JAMAIS DIRECTEMENT LE SOLDE.
+
+Le solde d'une caisse doit toujours être calculé uniquement à partir des CashOperation.
+
+====================================================
+NOUVELLE REGLE METIER
+====================================================
+
+Lorsqu'un transfert devient COMPLETED
+(ou APPROVED si l'application ne distingue pas ces deux états),
+
+le système doit créer automatiquement deux opérations.
+
+====================================================
+OPERATION 1
+====================================================
+
+CashOperation
+
+Type :
+TRANSFER_OUT
+
+CashRegister :
+Source
+
+Montant :
+Montant du transfert
+
+Référence :
+TransferRef
+
+CashTransferId :
+Id du transfert
+
+Description :
+Transfert vers la caisse XXX
+
+Catégorie :
+Transfert
+
+====================================================
+OPERATION 2
+====================================================
+
+CashOperation
+
+Type :
+TRANSFER_IN
+
+CashRegister :
+Destination
+
+Montant :
+Montant du transfert
+
+Référence :
+TransferRef
+
+CashTransferId :
+Id du transfert
+
+Description :
+Transfert depuis la caisse XXX
+
+Catégorie :
+Transfert
+
+====================================================
+CONTRAINTES
+====================================================
+
+Les deux opérations doivent être créées dans UNE transaction EF Core.
+
+Si une opération échoue :
+
+aucune des deux ne doit être enregistrée.
+
+Le CashTransfer ne doit pas passer à COMPLETED.
+
+====================================================
+WORKFLOW
+====================================================
+
+Cas sans validation
+
+Création transfert
+
+↓
+
+Validation automatique
+
+↓
+
+Création des deux CashOperation
+
+↓
+
+COMPLETED
+
+----------------------------------------------------
+
+Cas avec validation
+
+Création
+
+↓
+
+PENDING_APPROVAL
+
+↓
+
+AUCUNE opération créée
+
+↓
+
+Approbation
+
+↓
+
+Création des deux CashOperation
+
+↓
+
+COMPLETED
+
+----------------------------------------------------
+
+Cas rejet
+
+Création
+
+↓
+
+PENDING
+
+↓
+
+REJECTED
+
+↓
+
+Aucune CashOperation
+
+====================================================
+ANNULATION
+====================================================
+
+Si un transfert COMPLETED est annulé
+(selon les droits),
+
+le système ne doit jamais supprimer les opérations.
+
+Il doit créer deux opérations inverses :
+
+TRANSFER_OUT_REVERSAL
+
+TRANSFER_IN_REVERSAL
+
+afin de conserver une parfaite traçabilité.
+
+====================================================
+DOMAIN
+====================================================
+
+Mettre à jour si nécessaire :
+
+CashTransfer
+
+CashOperation
+
+Enums
+
+CashOperationType
+
+Ajouter :
+
+TRANSFER_OUT
+
+TRANSFER_IN
+
+TRANSFER_OUT_REVERSAL
+
+TRANSFER_IN_REVERSAL
+
+====================================================
+RELATIONS
+====================================================
+
+Ajouter la relation
+
+CashTransfer
+
+↓
+
+CashOperations
+
+Un transfert peut être lié à plusieurs opérations.
+
+Au minimum :
+
+2 opérations
+
+ou
+
+4 si annulation.
+
+====================================================
+SERVICE
+====================================================
+
+Modifier CashTransferService.
+
+Créer une méthode privée par exemple
+
+CreateTransferOperationsAsync()
+
+qui :
+
+- crée la sortie
+
+- crée l'entrée
+
+- journalise
+
+- met à jour le transfert
+
+Le code doit être factorisé.
+
+Aucune duplication.
+
+====================================================
+AUDIT
+====================================================
+
+Tracer :
+
+Création transfert
+
+Validation
+
+Création des opérations
+
+Annulation
+
+Création des écritures inverses
+
+====================================================
+JOURNAL DES OPERATIONS
+====================================================
+
+Les opérations créées automatiquement doivent apparaître dans le journal normal des opérations.
+
+Elles doivent être distinguées visuellement grâce au type :
+
+TRANSFER_OUT
+
+TRANSFER_IN
+
+====================================================
+DASHBOARD
+====================================================
+
+Le Dashboard ne nécessite aucune logique spécifique.
+
+Les soldes doivent rester calculés uniquement à partir des CashOperation.
+
+====================================================
+RAPPORTS
+====================================================
+
+Les rapports existants doivent automatiquement intégrer les transferts grâce aux deux nouvelles opérations.
+
+Aucune logique spécifique ne doit être nécessaire.
+
+====================================================
+EXPORTS
+====================================================
+
+Les exports Excel et PDF doivent afficher également :
+
+TRANSFER_OUT
+
+TRANSFER_IN
+
+comme des opérations normales.
+
+====================================================
+API
+====================================================
+
+Ne pas modifier les endpoints publics.
+
+La création des deux opérations doit être totalement transparente pour le frontend.
+
+====================================================
+BDD
+====================================================
+
+Ajouter si nécessaire
+
+CashTransferId
+
+dans CashOperation.
+
+Créer les migrations EF Core.
+
+Mettre à jour les configurations.
+
+Mettre à jour les index.
+
+====================================================
+TESTS
+====================================================
+
+Prévoir les cas :
+
+✓ transfert validé
+
+✓ transfert rejeté
+
+✓ transfert annulé
+
+✓ rollback transaction
+
+✓ transfert entre deux caisses
+
+✓ contrôle des soldes
+
+====================================================
+CE QUE JE VEUX
+====================================================
+
+Réponds dans cet ordre :
+
+PARTIE A
+
+Analyse de l'architecture actuelle
+
+PARTIE B
+
+Modifications du modèle métier
+
+PARTIE C
+
+Modifications EF Core
+
+PARTIE D
+
+Code complet du CashTransferService mis à jour
+
+PARTIE E
+
+Code des nouvelles méthodes privées
+
+PARTIE F
+
+Modification de CashOperation
+
+PARTIE G
+
+Migration EF
+
+PARTIE H
+
+Flux complet d'un transfert
+
+PARTIE I
+
+Cas d'annulation
+
+PARTIE J
+
+Tests unitaires et tests d'intégration
+
+====================================================
+IMPORTANT
+====================================================
+
+Je ne veux PAS une réécriture complète.
+
+Je veux un refactoring propre.
+
+Respecte l'architecture existante.
+
+Le code doit être prêt à intégrer directement dans le projet.

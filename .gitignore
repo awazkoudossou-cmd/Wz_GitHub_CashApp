@@ -1,0 +1,24 @@
+# Portable Node (téléchargé par start-frontend.ps1, ~80 Mo)
+.tools/
+
+# .NET build artifacts (au cas où generes a la racine)
+bin/
+obj/
+
+# Node
+node_modules/
+
+# Env files (garder .env.example)
+.env
+
+# Local databases
+*.db
+*.db-shm
+*.db-wal
+
+# OS / editors
+.DS_Store
+.vs/
+.idea/
+.vscode/*
+!.vscode/extensions.json

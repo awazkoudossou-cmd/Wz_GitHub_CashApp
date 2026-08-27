@@ -1,0 +1,366 @@
+Nous continuons exactement le même projet.
+
+Ne jamais modifier les modules V1 et V2.
+
+Ne jamais modifier l'architecture créée dans le Prompt 1.
+
+Nous allons maintenant développer entièrement les PARAMÈTRES COMPTABLES.
+
+=========================================================
+OBJECTIF
+=========================================================
+
+Créer un assistant de configuration (Wizard) utilisant un Stepper Vertical Material UI.
+
+Cet écran permettra de configurer entièrement le moteur comptable.
+
+L'écran fonctionne selon deux modes :
+
+VIEW MODE
+
+Toutes les informations sont consultables uniquement.
+
+Aucune modification.
+
+EDIT MODE
+
+Toutes les étapes deviennent modifiables.
+
+Un bouton
+
+Modifier
+
+fait passer de View à Edit.
+
+Un bouton
+
+Annuler
+
+revient à View.
+
+Un bouton
+
+Enregistrer
+
+sauvegarde toute la configuration.
+
+=========================================================
+ETAPE 1
+JOURNAUX DES CAISSES
+=========================================================
+
+Afficher toutes les caisses actives.
+
+Colonnes :
+
+Nom
+
+Code caisse
+
+Journal associé
+
+Etat
+
+L'utilisateur choisit un journal dans une liste déroulante.
+
+La liste provient de
+
+AccountingJournal.
+
+Impossible de passer à l'étape suivante si une caisse active n'a pas de journal.
+
+Afficher un compteur.
+
+Exemple
+
+8 / 10 caisses configurées.
+
+=========================================================
+ETAPE 2
+COMPTES DES CAISSES
+=========================================================
+
+Afficher toutes les caisses.
+
+Colonnes :
+
+Nom
+
+Compte associé
+
+Nature
+
+Etat
+
+Le compte provient du Plan Comptable.
+
+Recherche par :
+
+Numéro
+
+Libellé
+
+Autocomplete.
+
+Impossible de continuer tant qu'une caisse n'a pas de compte.
+
+=========================================================
+ETAPE 3
+COMPTES DES CATEGORIES
+=========================================================
+
+Afficher toutes les catégories.
+
+Colonnes
+
+Catégorie
+
+Compte
+
+Nature
+
+Etat
+
+Autocomplete.
+
+Recherche instantanée.
+
+Impossible de continuer si une catégorie utilisée n'a pas de compte.
+
+=========================================================
+ETAPE 4
+TYPE DE GENERATION
+=========================================================
+
+Choix exclusif.
+
+○ Génération détaillée
+
+○ Génération centralisée
+
+Afficher une explication illustrée.
+
+DETAILLEE
+
+Chaque opération produit ses propres écritures.
+
+CENTRALISEE
+
+Les comptes de contrepartie sont regroupés par journal et par compte caisse.
+
+Ajouter un aperçu dynamique.
+
+=========================================================
+ETAPE 5
+MODE DE GENERATION
+=========================================================
+
+Choix exclusif.
+
+○ Manuellement
+
+○ Automatiquement à la clôture de caisse
+
+Explication.
+
+MODE MANUEL
+
+L'utilisateur choisira plus tard :
+
+Date début
+
+Date fin
+
+Caisses
+
+Puis générera les écritures.
+
+MODE AUTOMATIQUE
+
+Après chaque clôture :
+
+Le moteur tente automatiquement la génération.
+
+Les opérations incomplètes seront placées dans :
+
+Opérations comptables en attente.
+
+=========================================================
+ETAPE 6
+MODELE DE LIBELLE
+=========================================================
+
+Créer un éditeur de modèle.
+
+Variables disponibles :
+
+{OperationNumber}
+
+{Category}
+
+{CashRegister}
+
+{Amount}
+
+{OperationDate}
+
+{Reference}
+
+{Cashier}
+
+{SessionNumber}
+
+{Journal}
+
+Le modèle est libre.
+
+Exemple :
+
+{Category} - {CashRegister} - {OperationNumber}
+
+Ajouter :
+
+Aperçu en temps réel.
+
+Exemple généré.
+
+Bouton
+
+Réinitialiser.
+
+=========================================================
+ETAPE 7
+VALIDATION
+=========================================================
+
+Construire une Checklist.
+
+Journal caisse
+
+Compte caisse
+
+Compte catégorie
+
+Type génération
+
+Mode génération
+
+Libellé
+
+Chaque ligne affiche
+
+OK
+
+ou
+
+Erreur.
+
+Si une erreur existe
+
+le bouton
+
+Valider la configuration
+
+est désactivé.
+
+=========================================================
+CONFIGURATION
+=========================================================
+
+Une fois validée :
+
+AccountingSettings.IsConfigured = true
+
+=========================================================
+REGLES
+=========================================================
+
+Le moteur comptable ne pourra jamais être utilisé tant que :
+
+IsConfigured = false
+
+=========================================================
+API
+=========================================================
+
+Créer toutes les routes.
+
+GET
+
+PUT
+
+Validation
+
+Checklist
+
+Prévisualisation.
+
+=========================================================
+SERVICES
+=========================================================
+
+AccountingSettingsService
+
+AccountingValidationService
+
+AccountingPreviewService
+
+=========================================================
+REACT
+=========================================================
+
+Construire intégralement la page.
+
+Material UI.
+
+Stepper Vertical.
+
+Cards.
+
+Autocomplete.
+
+Snackbar.
+
+Dialog de confirmation.
+
+Responsive.
+
+Dark Mode.
+
+=========================================================
+TESTS
+=========================================================
+
+Créer les tests :
+
+Validation
+
+Blocage
+
+Modification
+
+Sauvegarde
+
+Checklist
+
+=========================================================
+LIVRABLE
+=========================================================
+
+Je veux :
+
+Analyse
+
+Architecture
+
+Backend
+
+Services
+
+API
+
+React
+
+Tests
+
+Résumé

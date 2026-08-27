@@ -1,0 +1,421 @@
+Nous poursuivons exactement le même projet.
+
+Ne jamais modifier les prompts précédents.
+
+Développer toute l'interface React du module Comptabilité.
+
+Utiliser exclusivement :
+
+React 19
+
+TypeScript
+
+Material UI
+
+React Hook Form
+
+TanStack Query
+
+Axios
+
+React Router
+
+=========================================================
+OBJECTIF
+=========================================================
+
+Construire une interface ERP moderne.
+
+Toutes les pages doivent respecter le même Design System que le reste de l'application.
+
+=========================================================
+MENU
+=========================================================
+
+Créer le menu :
+
+COMPTABILITE
+
+avec :
+
+Tableau de bord
+
+Paramètres
+
+Plan comptable
+
+Journaux comptables
+
+Générations
+
+Brouillard comptable
+
+Opérations en attente
+
+Exports
+
+=========================================================
+TABLEAU DE BORD
+=========================================================
+
+Créer un Dashboard.
+
+Afficher :
+
+Nombre de comptes
+
+Nombre de journaux
+
+Nombre de catégories configurées
+
+Nombre de caisses configurées
+
+Nombre de Batch
+
+Nombre d'écritures
+
+Nombre d'opérations en attente
+
+Dernière génération
+
+Dernier export
+
+=========================================================
+KPI
+=========================================================
+
+Créer des Cards Material UI.
+
+Exemple
+
+Batch aujourd'hui
+
+Ecritures aujourd'hui
+
+Exports aujourd'hui
+
+Erreurs
+
+=========================================================
+GRAPHIQUES
+=========================================================
+
+Utiliser Recharts.
+
+Afficher :
+
+Evolution des écritures
+
+Générations par jour
+
+Répartition des journaux
+
+Répartition des comptes
+
+=========================================================
+PLAN COMPTABLE
+=========================================================
+
+Créer une page complète.
+
+DataGrid.
+
+Colonnes :
+
+Compte
+
+Libellé
+
+Nature
+
+Etat
+
+Recherche
+
+Tri
+
+Pagination
+
+Ajout
+
+Modification
+
+Activation
+
+Désactivation
+
+Suppression si non utilisé
+
+=========================================================
+JOURNAUX
+=========================================================
+
+Créer une page identique.
+
+Colonnes :
+
+Code
+
+Nom
+
+Description
+
+Etat
+
+=========================================================
+PARAMETRES
+=========================================================
+
+Intégrer le Stepper Vertical développé précédemment.
+
+Ajouter :
+
+Mode Lecture
+
+Mode Edition
+
+Confirmation
+
+=========================================================
+GENERATIONS
+=========================================================
+
+Créer une page.
+
+Afficher :
+
+Toutes les générations.
+
+Colonnes :
+
+Batch
+
+Date
+
+Utilisateur
+
+Type
+
+Mode
+
+Nombre opérations
+
+Nombre écritures
+
+Etat
+
+Export
+
+Actions :
+
+Voir
+
+Exporter
+
+Supprimer
+
+Regénérer
+
+=========================================================
+BROUILLARD
+=========================================================
+
+Créer une page.
+
+DataGrid.
+
+Toutes les colonnes.
+
+Double clic
+
+↓
+
+Drawer
+
+↓
+
+Détail complet.
+
+=========================================================
+OPERATIONS EN ATTENTE
+=========================================================
+
+Créer une page.
+
+Colonnes :
+
+Date
+
+Opération
+
+Motif
+
+Etat
+
+Actions :
+
+Voir
+
+Retraiter
+
+=========================================================
+EXPORTS
+=========================================================
+
+Créer une page.
+
+Afficher :
+
+Historique des exports.
+
+Nom fichier
+
+Date
+
+Utilisateur
+
+Nombre lignes
+
+Téléchargement
+
+=========================================================
+SEARCH
+=========================================================
+
+Créer une recherche globale.
+
+=========================================================
+FILTRES
+=========================================================
+
+Créer des filtres avancés.
+
+Tous persistants.
+
+=========================================================
+THEME
+=========================================================
+
+Respecter :
+
+Dark Mode
+
+Light Mode
+
+=========================================================
+RESPONSIVE
+=========================================================
+
+Desktop
+
+Tablette
+
+Mobile
+
+=========================================================
+DIALOGS
+=========================================================
+
+Créer :
+
+Confirmation
+
+Erreur
+
+Succès
+
+Information
+
+=========================================================
+NOTIFICATIONS
+=========================================================
+
+Créer :
+
+Snackbar
+
+Alert
+
+Badges
+
+=========================================================
+LOADING
+=========================================================
+
+Créer :
+
+Skeleton
+
+Progress
+
+Loading Overlay
+
+=========================================================
+HOOKS
+=========================================================
+
+Créer tous les hooks.
+
+=========================================================
+SERVICES
+=========================================================
+
+Créer tous les services Axios.
+
+=========================================================
+TYPESCRIPT
+=========================================================
+
+Créer tous les Types.
+
+=========================================================
+VALIDATION
+=========================================================
+
+Utiliser
+
+React Hook Form
+
++
+
+Zod
+
+=========================================================
+ACCESSIBILITE
+=========================================================
+
+Respecter les règles d'accessibilité Material UI.
+
+=========================================================
+TESTS
+=========================================================
+
+Créer :
+
+Tests composants
+
+Tests hooks
+
+Tests pages
+
+=========================================================
+LIVRABLE
+=========================================================
+
+Analyse
+
+Architecture
+
+Composants
+
+Pages
+
+Hooks
+
+Services
+
+Types
+
+Tests
+
+Résumé

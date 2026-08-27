@@ -1,0 +1,453 @@
+Nous poursuivons exactement le même projet.
+
+Ne jamais modifier les prompts précédents.
+
+Nous allons maintenant développer le moteur comptable complet.
+
+=========================================================
+OBJECTIF
+=========================================================
+
+Créer un moteur de génération des écritures comptables.
+
+Le moteur lit les CashOperation.
+
+Il ne modifie jamais les opérations.
+
+Il produit des AccountingEntry.
+
+=========================================================
+ARCHITECTURE
+=========================================================
+
+Créer un nouveau service :
+
+AccountingGenerationService
+
+Ce service sera le SEUL autorisé à générer des écritures.
+
+Aucun Controller ne pourra générer directement.
+
+=========================================================
+NOUVELLE ENTITE
+=========================================================
+
+Créer :
+
+AccountingBatch
+
+Id
+
+BatchNumber
+
+GenerationDate
+
+GenerationMode
+
+GenerationType
+
+GeneratedBy
+
+Status
+
+TotalOperations
+
+TotalEntries
+
+Remarks
+
+Chaque génération appartient à un Batch.
+
+Chaque Entry appartient à un Batch.
+
+=========================================================
+WORKFLOW
+=========================================================
+
+Recherche
+
+↓
+
+Vérification
+
+↓
+
+Création Batch
+
+↓
+
+Création Entries
+
+↓
+
+Mise à jour Batch
+
+↓
+
+Journalisation
+
+=========================================================
+SELECTION DES OPERATIONS
+=========================================================
+
+Ne sélectionner QUE
+
+CashOperation
+
+Status = POSTED
+
+Ne jamais traiter
+
+DRAFT
+
+PENDING_APPROVAL
+
+REJECTED
+
+CANCELLED
+
+=========================================================
+VERIFICATION
+=========================================================
+
+Avant chaque génération vérifier :
+
+La caisse possède un journal.
+
+La caisse possède un compte.
+
+La catégorie possède un compte.
+
+Le moteur est configuré.
+
+L'opération n'est pas déjà comptabilisée.
+
+=========================================================
+DOUBLE GENERATION
+=========================================================
+
+Une opération ne peut jamais être comptabilisée deux fois.
+
+Ne jamais utiliser :
+
+IsGenerated
+
+Toujours vérifier :
+
+AccountingEntry
+
+WHERE CashOperationId
+
+=========================================================
+GENERATION DETAILLEE
+=========================================================
+
+Chaque CashOperation produit immédiatement :
+
+Une ligne Débit
+
+Une ligne Crédit
+
+Exemple
+
+Entrée
+
+Débit
+
+Compte Caisse
+
+Crédit
+
+Compte Catégorie
+
+Sortie
+
+Débit
+
+Compte Catégorie
+
+Crédit
+
+Compte Caisse
+
+=========================================================
+GENERATION CENTRALISEE
+=========================================================
+
+Créer les lignes individuelles
+
+Puis regrouper
+
+Toutes les contreparties caisse
+
+Par
+
+Journal
+
+Compte caisse
+
+Créer une seule ligne
+
+Débit
+
+ou
+
+Crédit
+
+selon le sens.
+
+=========================================================
+TRANSFERT ENTRE CAISSES
+=========================================================
+
+Le transfert possède déjà :
+
+TRANSFER_OUT
+
+TRANSFER_IN
+
+Générer automatiquement :
+
+Sortie
+
+Débit
+
+Compte de transfert
+
+Crédit
+
+Compte caisse origine
+
+Entrée
+
+Débit
+
+Compte caisse destination
+
+Crédit
+
+Compte de transfert
+
+Le compte de transfert sera paramétrable.
+
+=========================================================
+DEPOT BANQUE
+=========================================================
+
+Débit
+
+Compte Banque
+
+Crédit
+
+Compte Caisse
+
+=========================================================
+OPERATIONS EN ATTENTE
+=========================================================
+
+Si une opération est incomplète
+
+Créer automatiquement
+
+AccountingPending
+
+Avec :
+
+Reason
+
+Date
+
+OperationId
+
+Exemples
+
+Compte catégorie absent
+
+Compte caisse absent
+
+Journal absent
+
+Configuration incomplète
+
+=========================================================
+RELANCE
+=========================================================
+
+Lorsque le paramétrage est corrigé
+
+Le moteur doit être capable de retraiter uniquement
+
+AccountingPending.
+
+=========================================================
+NUMERO DE PIECE
+=========================================================
+
+Toujours utiliser
+
+OperationNumber
+
+=========================================================
+LIBELLE
+=========================================================
+
+Utiliser le modèle défini dans
+
+AccountingSettings.
+
+Remplacer automatiquement
+
+Les variables.
+
+=========================================================
+BATCH NUMBER
+=========================================================
+
+Créer automatiquement
+
+Exemple
+
+ACC-20260703-00001
+
+=========================================================
+LOGS
+=========================================================
+
+Créer
+
+AccountingGenerationLog
+
+Avec
+
+Date
+
+Utilisateur
+
+Nombre opérations
+
+Nombre écritures
+
+Temps traitement
+
+Erreurs
+
+=========================================================
+PERFORMANCES
+=========================================================
+
+Utiliser
+
+Transactions EF Core.
+
+Batch Insert.
+
+AsNoTracking.
+
+CancellationToken.
+
+=========================================================
+API
+=========================================================
+
+Créer
+
+POST
+
+Generate
+
+POST
+
+GeneratePending
+
+GET
+
+Preview
+
+GET
+
+History
+
+GET
+
+Batch
+
+=========================================================
+PREVIEW
+=========================================================
+
+Avant génération
+
+Afficher
+
+Nombre opérations
+
+Nombre écritures
+
+Nombre en attente
+
+Temps estimé
+
+=========================================================
+ERREURS
+=========================================================
+
+Retourner
+
+Liste complète
+
+Jamais seulement la première.
+
+=========================================================
+TESTS
+=========================================================
+
+Tester
+
+Entrée
+
+Sortie
+
+Transfert
+
+Dépôt
+
+Centralisation
+
+Détail
+
+Double génération
+
+Pending
+
+Performance
+
+=========================================================
+REACT
+=========================================================
+
+Créer uniquement les appels API.
+
+Les écrans seront réalisés plus tard.
+
+=========================================================
+LIVRABLE
+=========================================================
+
+Analyse
+
+Architecture
+
+Domain
+
+Application
+
+Infrastructure
+
+API
+
+Services
+
+Tests
+
+Résumé

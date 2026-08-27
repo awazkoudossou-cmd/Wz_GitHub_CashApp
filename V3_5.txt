@@ -1,0 +1,447 @@
+Nous poursuivons exactement le même projet.
+
+Ne jamais modifier les prompts précédents.
+
+Nous allons maintenant développer toute la logique de génération automatique et manuelle.
+
+=========================================================
+OBJECTIF
+=========================================================
+
+Construire un moteur de génération entièrement asynchrone.
+
+Ne jamais lancer la génération directement depuis la clôture de caisse.
+
+Toujours utiliser une Queue.
+
+=========================================================
+NOUVELLE ENTITE
+=========================================================
+
+Créer :
+
+AccountingGenerationQueue
+
+Id
+
+CreatedDate
+
+RequestedBy
+
+GenerationMode
+
+StartDate
+
+EndDate
+
+Status
+
+Priority
+
+CashRegisters
+
+Remarks
+
+RetryCount
+
+StartedDate
+
+CompletedDate
+
+=========================================================
+ENUM
+=========================================================
+
+QueueStatus
+
+Pending
+
+Processing
+
+Completed
+
+Failed
+
+Cancelled
+
+=========================================================
+WORKFLOW
+=========================================================
+
+MODE MANUEL
+
+Utilisateur
+
+↓
+
+Choisit
+
+Date début
+
+Date fin
+
+Caisses
+
+↓
+
+Prévisualisation
+
+↓
+
+Confirmation
+
+↓
+
+Création Queue
+
+↓
+
+Accounting Worker
+
+↓
+
+AccountingGenerationService
+
+↓
+
+AccountingBatch
+
+↓
+
+Brouillard
+
+=========================================================
+MODE AUTOMATIQUE
+=========================================================
+
+Clôture de caisse
+
+↓
+
+Création Queue
+
+↓
+
+Accounting Worker
+
+↓
+
+AccountingGenerationService
+
+↓
+
+AccountingBatch
+
+↓
+
+Brouillard
+
+=========================================================
+ACCOUNTING WORKER
+=========================================================
+
+Créer un BackgroundService.
+
+Il surveille :
+
+AccountingGenerationQueue
+
+Toutes les X secondes.
+
+Lorsqu'une demande est trouvée :
+
+Status
+
+Pending
+
+↓
+
+Processing
+
+↓
+
+AccountingGenerationService
+
+↓
+
+Completed
+
+En cas d'erreur :
+
+↓
+
+Failed
+
+=========================================================
+RETRY
+=========================================================
+
+En cas d'échec :
+
+Possibilité de relancer.
+
+Maximum
+
+3 tentatives.
+
+Puis
+
+Etat
+
+FAILED DEFINITIF.
+
+=========================================================
+PREVISUALISATION
+=========================================================
+
+Avant toute génération :
+
+Calculer :
+
+Nombre opérations
+
+Nombre écritures estimées
+
+Nombre opérations déjà comptabilisées
+
+Nombre opérations ignorées
+
+Nombre opérations en attente
+
+Temps estimé
+
+Aucune écriture ne doit être créée.
+
+=========================================================
+OPERATIONS IGNOREES
+=========================================================
+
+Ne jamais traiter :
+
+Déjà comptabilisées
+
+Annulées
+
+Rejetées
+
+Brouillons
+
+En attente validation
+
+=========================================================
+OPERATIONS EN ATTENTE
+=========================================================
+
+Créer automatiquement
+
+AccountingPending
+
+Si :
+
+Journal absent
+
+Compte caisse absent
+
+Compte catégorie absent
+
+Configuration incomplète
+
+=========================================================
+TRAITEMENT DES PENDING
+=========================================================
+
+Créer une génération spécifique.
+
+Bouton :
+
+Retraiter les opérations en attente.
+
+Le moteur ne traite que :
+
+AccountingPending
+
+=========================================================
+QUEUE MONITOR
+=========================================================
+
+Créer une page.
+
+Afficher :
+
+Queue
+
+Status
+
+Début
+
+Fin
+
+Utilisateur
+
+Progression
+
+Nombre opérations
+
+Erreurs
+
+=========================================================
+ANNULATION
+=========================================================
+
+Une Queue
+
+Pending
+
+peut être annulée.
+
+Une Queue
+
+Processing
+
+ne peut pas être annulée.
+
+=========================================================
+NOTIFICATIONS
+=========================================================
+
+Créer des notifications :
+
+Génération terminée
+
+Erreur génération
+
+Export disponible
+
+Opérations en attente
+
+=========================================================
+API
+=========================================================
+
+Créer :
+
+POST
+
+GenerateManual
+
+POST
+
+RetryQueue
+
+POST
+
+CancelQueue
+
+GET
+
+Queue
+
+GET
+
+QueueDetails
+
+GET
+
+Preview
+
+=========================================================
+SERVICES
+=========================================================
+
+AccountingQueueService
+
+AccountingWorker
+
+AccountingPreviewService
+
+AccountingRetryService
+
+=========================================================
+AUDIT
+=========================================================
+
+Tracer :
+
+Création Queue
+
+Annulation
+
+Retry
+
+Fin génération
+
+Erreur
+
+=========================================================
+PERFORMANCES
+=========================================================
+
+Utiliser :
+
+Transactions
+
+CancellationToken
+
+Batch Insert
+
+AsNoTracking
+
+Pagination
+
+=========================================================
+REACT
+=========================================================
+
+Créer :
+
+Queue Monitor
+
+Prévisualisation
+
+Dialog confirmation
+
+ProgressBar
+
+Snackbars
+
+=========================================================
+TESTS
+=========================================================
+
+Tester :
+
+Queue
+
+Retry
+
+Annulation
+
+Preview
+
+Worker
+
+Performance
+
+Concurrence
+
+=========================================================
+LIVRABLE
+=========================================================
+
+Analyse
+
+Architecture
+
+Backend
+
+Services
+
+Worker
+
+API
+
+React
+
+Tests
+
+Résumé

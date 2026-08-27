@@ -1,0 +1,347 @@
+Nous allons faire évoluer l'application vers une architecture Multi-Tenant.
+
+IMPORTANT
+
+- Ne jamais casser les fonctionnalités existantes.
+- Ne jamais modifier les règles métier actuelles.
+- La migration doit être transparente pour les modules existants.
+- Respecter la Clean Architecture déjà en place.
+- Préparer l'application à une future migration vers SQL Server ou PostgreSQL.
+
+=========================================================
+OBJECTIF
+=========================================================
+
+Transformer l'application actuelle en architecture Multi-Tenant avec une seule base de données SQLite.
+
+Toutes les données métier seront partagées dans une seule base, mais isolées par TenantId.
+
+Toutes les fonctionnalités existantes doivent continuer à fonctionner.
+
+=========================================================
+ARCHITECTURE
+=========================================================
+
+Créer une véritable infrastructure Multi-Tenant.
+
+Ajouter un projet ou dossier "Multitenancy" contenant :
+
+- ITenantProvider
+- TenantProvider
+- TenantContext
+- TenantMiddleware (si nécessaire)
+- TenantService
+- TenantExtensions
+
+L'ensemble doit être réutilisable par tous les futurs modules.
+
+=========================================================
+NOUVELLE ENTITE
+=========================================================
+
+Créer l'entité Tenant.
+
+Champs :
+
+Id (Guid)
+
+Code
+
+Name
+
+ShortName
+
+TaxNumber
+
+RegistrationNumber
+
+Email
+
+Phone
+
+Website
+
+Address
+
+City
+
+Country
+
+Currency
+
+Language
+
+Logo
+
+IsActive
+
+CreatedAt
+
+UpdatedAt
+
+=========================================================
+ENTITE DE BASE
+=========================================================
+
+Créer une classe abstraite :
+
+TenantEntity
+
+Elle contient :
+
+Id
+
+TenantId
+
+CreatedAt
+
+UpdatedAt
+
+Toutes les entités métier devront désormais hériter de cette classe.
+
+Exemples :
+
+User
+
+CashRegister
+
+CashSession
+
+CashOperation
+
+CashTransfer
+
+BankDeposit
+
+CashCategory
+
+AccountingJournal
+
+AccountingAccount
+
+AccountingEntry
+
+AccountingBatch
+
+AccountingSettings
+
+AccountingExport
+
+AccountingPending
+
+Toutes les futures entités devront également en hériter.
+
+=========================================================
+GLOBAL QUERY FILTER
+=========================================================
+
+Configurer EF Core afin que toutes les requêtes soient automatiquement filtrées sur le TenantId courant.
+
+Ne jamais écrire :
+
+Where(x => x.TenantId == ...)
+
+dans les services ou repositories.
+
+Utiliser exclusivement les Global Query Filters.
+
+=========================================================
+TENANT PROVIDER
+=========================================================
+
+Créer un ITenantProvider.
+
+Il expose :
+
+CurrentTenantId
+
+CurrentTenant
+
+CompanyName
+
+Currency
+
+Language
+
+L'ensemble est injecté par Dependency Injection.
+
+=========================================================
+AUTHENTIFICATION
+=========================================================
+
+Ajouter la notion de Tenant.
+
+Lors de la connexion :
+
+1. L'utilisateur saisit son identifiant et son mot de passe.
+2. Le système retrouve le Tenant associé.
+3. Le Tenant est chargé dans le TenantProvider.
+4. Toutes les requêtes utilisent automatiquement ce Tenant.
+
+Prévoir la possibilité qu'un utilisateur appartienne à plusieurs Tenants dans une évolution future.
+
+=========================================================
+MIGRATION DES DONNEES
+=========================================================
+
+Créer une migration permettant :
+
+- la création de la table Tenant ;
+- l'ajout du champ TenantId sur toutes les tables métier ;
+- la création d'un Tenant par défaut ;
+- l'affectation automatique des données existantes à ce Tenant.
+
+Aucune donnée existante ne doit être perdue.
+
+=========================================================
+CONTRAINTES
+=========================================================
+
+Ajouter les index suivants sur toutes les tables métier :
+
+TenantId
+
+TenantId + Date
+
+TenantId + Code
+
+TenantId + Name
+
+selon la nature de la table.
+
+=========================================================
+UNICITE
+=========================================================
+
+Les contraintes d'unicité deviennent spécifiques au Tenant.
+
+Exemple :
+
+Deux entreprises différentes peuvent avoir :
+
+CAISSE PRINCIPALE
+
+sans conflit.
+
+Les index doivent être composés :
+
+TenantId + ChampUnique
+
+=========================================================
+PARAMETRES
+=========================================================
+
+Tous les paramètres deviennent spécifiques au Tenant.
+
+Exemple :
+
+AccountingSettings
+
+NumberingSettings
+
+ApplicationSettings
+
+DashboardSettings
+
+FeatureModules
+
+=========================================================
+NUMEROTATION
+=========================================================
+
+Le moteur de numérotation est spécifique au Tenant.
+
+Chaque entreprise possède ses propres compteurs.
+
+Exemple :
+
+Tenant A
+
+OP000001
+
+Tenant B
+
+OP000001
+
+=========================================================
+COMPTABILITE
+=========================================================
+
+Le moteur comptable doit fonctionner automatiquement avec le Tenant courant.
+
+Toutes les écritures générées héritent du TenantId de l'opération de caisse.
+
+=========================================================
+EXPORTS
+=========================================================
+
+Tous les exports doivent être limités au Tenant actif.
+
+=========================================================
+SAUVEGARDES
+=========================================================
+
+Prévoir une abstraction permettant plus tard d'effectuer une sauvegarde par Tenant, même si la base est unique.
+
+=========================================================
+API
+=========================================================
+
+Aucune API ne doit accepter un TenantId en paramètre.
+
+Le Tenant est déterminé automatiquement via le TenantProvider.
+
+=========================================================
+SECURITE
+=========================================================
+
+Un utilisateur ne doit jamais accéder aux données d'un autre Tenant.
+
+Même en modifiant les paramètres des requêtes HTTP.
+
+=========================================================
+REACT
+=========================================================
+
+Adapter toute l'application.
+
+Le Tenant courant est chargé après authentification.
+
+Afficher le nom et le logo de l'entreprise dans le Header.
+
+Prévoir un futur sélecteur de Tenant (sans l'implémenter).
+
+=========================================================
+AUDIT
+=========================================================
+
+Toutes les traces d'audit enregistrent également le TenantId.
+
+=========================================================
+TESTS
+=========================================================
+
+Créer des tests unitaires et d'intégration vérifiant :
+
+- l'isolation complète des données ;
+- le fonctionnement des Global Query Filters ;
+- la migration des données existantes ;
+- les contraintes d'unicité par Tenant ;
+- la génération comptable par Tenant ;
+- les exports par Tenant.
+
+=========================================================
+QUALITE
+=========================================================
+
+Respecter :
+
+- Clean Architecture
+- SOLID
+- Dependency Injection
+- EF Core
+- Global Query Filters
+- Repository Pattern existant
+- CQRS léger si déjà utilisé
+
+Le code doit être prêt à migrer ultérieurement vers SQL Server ou PostgreSQL sans modification majeure.

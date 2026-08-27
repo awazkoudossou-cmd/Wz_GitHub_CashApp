@@ -1,0 +1,556 @@
+Nous poursuivons exactement le même projet.
+
+Ne réécris jamais les modules existants.
+
+Tu dois uniquement ajouter un NOUVEAU MODULE nommé :
+
+ACCOUNTING
+
+respectant l'architecture existante.
+
+=========================================================
+CONTEXTE GENERAL
+=========================================================
+
+Application :
+
+Gestion de Caisse
+
+Stack :
+
+- ASP.NET Core 9 Web API
+
+- React 19
+
+- TypeScript
+
+- Material UI
+
+- EF Core
+
+- SQLite
+
+Architecture :
+
+CashApp.Api
+
+CashApp.Application
+
+CashApp.Domain
+
+CashApp.Infrastructure
+
+CashApp.Shared
+
+Modules existants :
+
+✓ Authentification
+
+✓ Utilisateurs
+
+✓ Caisses
+
+✓ Sessions
+
+✓ CashOperation
+
+✓ CashTransfer
+
+✓ Dépôts Banque
+
+✓ Validation
+
+✓ Dashboard
+
+✓ Incidents
+
+✓ Paramètres
+
+✓ Exports
+
+✓ Sauvegarde
+
+✓ Feature Modules
+
+✓ AppMode
+
+Le module Comptabilité doit être totalement indépendant du module Caisse.
+
+Il ne doit JAMAIS modifier les opérations.
+
+Il ne fait que CONSOMMER les CashOperation.
+
+=========================================================
+VISIBILITE DU MODULE
+=========================================================
+
+Le menu Comptabilité est visible uniquement si :
+
+Application Mode = ADVANCED
+
+ET
+
+Module ACCOUNTING activé
+
+ET
+
+Utilisateur connecté = SUPERVISOR
+
+Dans tous les autres cas,
+
+le menu est totalement invisible.
+
+=========================================================
+NOUVEAU FEATURE MODULE
+=========================================================
+
+Ajouter :
+
+FeatureModule
+
+ACCOUNTING
+
+Activable / Désactivable
+
+depuis
+
+Modules
+
+=========================================================
+MENU
+=========================================================
+
+Créer le menu :
+
+COMPTABILITE
+
+avec les sous-menus :
+
+Paramètres comptables
+
+Plan comptable
+
+Journaux comptables
+
+Brouillard comptable
+
+Générations
+
+Exports comptables
+
+=========================================================
+NOUVELLES ENTITES
+=========================================================
+
+Créer les entités suivantes.
+
+=========================================================
+
+AccountingJournal
+
+=========================================================
+
+Id
+
+Code
+
+Name
+
+Description
+
+IsActive
+
+CreatedAt
+
+UpdatedAt
+
+=========================================================
+
+AccountingAccount
+
+=========================================================
+
+Id
+
+AccountNumber
+
+Name
+
+Nature
+
+IsActive
+
+CreatedAt
+
+UpdatedAt
+
+=========================================================
+
+AccountingSettings
+
+=========================================================
+
+Id
+
+GenerationType
+
+GenerationMode
+
+NarrationTemplate
+
+IsConfigured
+
+CreatedAt
+
+UpdatedAt
+
+=========================================================
+
+AccountingGeneration
+
+=========================================================
+
+Id
+
+Reference
+
+GenerationType
+
+GenerationMode
+
+StartDate
+
+EndDate
+
+Status
+
+GeneratedBy
+
+GeneratedAt
+
+Exported
+
+ExportedAt
+
+=========================================================
+
+AccountingEntry
+
+=========================================================
+
+Id
+
+GenerationId
+
+CashOperationId
+
+JournalId
+
+AccountId
+
+EntryDate
+
+OperationDate
+
+Reference
+
+PieceNumber
+
+Description
+
+Debit
+
+Credit
+
+CreatedAt
+
+=========================================================
+
+AccountingPending
+
+=========================================================
+
+Id
+
+CashOperationId
+
+Reason
+
+CreatedDate
+
+Resolved
+
+ResolvedDate
+
+=========================================================
+ENUMS
+=========================================================
+
+AccountingGenerationType
+
+CENTRALIZED
+
+DETAILED
+
+---------------------------------------------------------
+
+AccountingGenerationMode
+
+MANUAL
+
+ON_CASH_CLOSING
+
+---------------------------------------------------------
+
+AccountingGenerationStatus
+
+DRAFT
+
+GENERATED
+
+EXPORTED
+
+CANCELLED
+
+---------------------------------------------------------
+
+AccountingAccountNature
+
+ASSET
+
+LIABILITY
+
+EXPENSE
+
+REVENUE
+
+BANK
+
+CASH
+
+EQUITY
+
+OTHER
+
+=========================================================
+RELATIONS
+=========================================================
+
+CashRegister
+
+↓
+
+AccountingJournal
+
+CashRegister
+
+↓
+
+AccountingAccount
+
+CashCategory
+
+↓
+
+AccountingAccount
+
+AccountingGeneration
+
+↓
+
+AccountingEntries
+
+CashOperation
+
+↓
+
+AccountingEntry
+
+CashOperation
+
+↓
+
+AccountingPending
+
+=========================================================
+IMPORTANT
+=========================================================
+
+Ne jamais stocker
+
+AccountNumber
+
+dans CashCategory.
+
+Ne jamais stocker
+
+JournalCode
+
+dans CashRegister.
+
+Toujours utiliser des Foreign Keys.
+
+=========================================================
+PREMIER DEMARRAGE
+=========================================================
+
+Créer un assistant d'initialisation.
+
+Choix proposés :
+
+○ Plan comptable vide
+
+○ Plan comptable OHADA
+
+○ Import Excel
+
+Si OHADA est choisi,
+
+préparer le service permettant de charger automatiquement
+les comptes depuis un fichier JSON.
+
+Ne pas encore coder le JSON.
+
+=========================================================
+PARAMETRES COMPTABLES
+=========================================================
+
+Créer un écran dédié.
+
+Il sera réalisé plus tard.
+
+Pour l'instant,
+
+prévoir uniquement
+
+AccountingSettings
+
+=========================================================
+SECURITE
+=========================================================
+
+Créer la Policy :
+
+AccountingSupervisor
+
+Accès :
+
+ROLE_SUPERVISOR uniquement
+
+=========================================================
+AUDIT
+=========================================================
+
+Tracer :
+
+Création Journal
+
+Modification Journal
+
+Création Compte
+
+Modification Compte
+
+Activation
+
+Désactivation
+
+=========================================================
+BDD
+=========================================================
+
+Créer toutes les configurations EF Core.
+
+Créer les Index.
+
+Créer les Foreign Keys.
+
+Créer les Migrations.
+
+=========================================================
+DTO
+=========================================================
+
+Créer tous les DTO.
+
+Create
+
+Update
+
+Read
+
+List
+
+=========================================================
+API
+=========================================================
+
+Créer les Controllers REST.
+
+AccountingJournalController
+
+AccountingAccountController
+
+AccountingSettingsController
+
+AccountingGenerationController
+
+AccountingExportController
+
+Respecter l'architecture existante.
+
+=========================================================
+REACT
+=========================================================
+
+Créer uniquement
+
+les pages vides.
+
+Le contenu sera développé dans les prochains prompts.
+
+=========================================================
+LIVRABLE
+=========================================================
+
+Je veux :
+
+PARTIE A
+
+Analyse
+
+PARTIE B
+
+Architecture
+
+PARTIE C
+
+Domain
+
+PARTIE D
+
+Infrastructure
+
+PARTIE E
+
+Application
+
+PARTIE F
+
+API
+
+PARTIE G
+
+Migration EF
+
+PARTIE H
+
+Pages React
+
+PARTIE I
+
+Tests
+
+PARTIE J
+
+Résumé

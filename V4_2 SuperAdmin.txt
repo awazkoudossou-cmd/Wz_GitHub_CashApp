@@ -1,0 +1,269 @@
+=========================================================
+SUPERADMIN PLATFORM
+=========================================================
+
+Créer un niveau d'administration supérieur appelé :
+
+SuperAdmin
+
+Le SuperAdmin n'appartient à aucune entreprise.
+
+Il administre uniquement la plateforme.
+
+Il ne peut pas accéder directement aux opérations de caisse ou aux données comptables d'une entreprise.
+
+=========================================================
+TABLEAU DE BORD SUPERADMIN
+=========================================================
+
+Créer un Dashboard dédié au SuperAdmin.
+
+Le Dashboard affiche notamment :
+
+- Nombre total d'entreprises
+- Nombre d'entreprises actives
+- Nombre d'entreprises inactives
+- Nombre total d'utilisateurs
+- Nombre de connexions aujourd'hui
+- Nombre total de caisses
+- Nombre total d'opérations
+- Nombre de sauvegardes
+- Nombre d'erreurs critiques
+- Dernières entreprises créées
+
+Afficher également des graphiques :
+
+- Évolution du nombre d'entreprises
+- Répartition des entreprises par pays
+- Répartition des utilisateurs
+- Activité quotidienne
+
+=========================================================
+GESTION DES ENTREPRISES
+=========================================================
+
+Créer un menu :
+
+Administration
+
+    Entreprises
+
+Fonctionnalités :
+
+- Liste paginée
+- Recherche
+- Tri
+- Filtres
+- Création
+- Consultation
+- Modification
+- Désactivation
+- Réactivation
+- Suppression logique
+
+=========================================================
+FORMULAIRE ENTREPRISE
+=========================================================
+
+Informations :
+
+Nom
+
+Code
+
+Nom court
+
+Adresse
+
+Ville
+
+Pays
+
+Téléphone
+
+Email
+
+Site web
+
+Devise
+
+Langue
+
+Numéro fiscal
+
+Numéro RCCM (ou équivalent)
+
+Logo
+
+Statut
+
+=========================================================
+INITIALISATION
+=========================================================
+
+Lors de la création d'une entreprise :
+
+Créer automatiquement :
+
+- les paramètres par défaut ;
+- le moteur de numérotation ;
+- les modules par défaut ;
+- le premier utilisateur Superviseur ;
+- les rôles par défaut ;
+- les catégories de caisse par défaut ;
+- les paramètres comptables par défaut.
+
+=========================================================
+LICENCE
+=========================================================
+
+Chaque entreprise possède une licence.
+
+Créer les champs :
+
+Date de début
+
+Date de fin
+
+Type de licence
+
+Nombre maximum d'utilisateurs
+
+Nombre maximum de caisses
+
+Nombre maximum de sessions simultanées
+
+Modules autorisés
+
+Statut
+
+=========================================================
+MODULES
+=========================================================
+
+Le SuperAdmin peut activer ou désactiver les modules pour chaque entreprise.
+
+Exemple :
+
+Gestion de caisse
+
+Validation
+
+Comptabilité
+
+Rapports avancés
+
+Imports
+
+Exports
+
+Pièces jointes
+
+=========================================================
+STATISTIQUES
+=========================================================
+
+Afficher pour chaque entreprise :
+
+Nombre d'utilisateurs
+
+Nombre de caisses
+
+Nombre d'opérations
+
+Dernière connexion
+
+Dernière sauvegarde
+
+Dernière génération comptable
+
+Dernier export
+
+=========================================================
+SECURITE
+=========================================================
+
+Le SuperAdmin ne peut pas consulter directement les données métier (opérations, écritures, etc.).
+
+Il ne gère que l'administration de la plateforme.
+
+Prévoir une fonctionnalité future "Se connecter en tant que..." (Impersonation), mais ne pas l'implémenter.
+
+=========================================================
+REACT
+=========================================================
+
+Créer un espace d'administration indépendant.
+
+Menu latéral dédié.
+
+Dashboard dédié.
+
+DataGrid Material UI.
+
+Dialogs.
+
+Formulaires.
+
+Responsive.
+
+=========================================================
+API
+=========================================================
+
+Créer les endpoints :
+
+GET Companies
+
+GET Company
+
+POST Company
+
+PUT Company
+
+DELETE Company
+
+PATCH Activate
+
+PATCH Deactivate
+
+GET Dashboard
+
+GET Statistics
+
+=========================================================
+TESTS
+=========================================================
+
+Créer les tests :
+
+Création d'entreprise
+
+Modification
+
+Activation
+
+Désactivation
+
+Licence
+
+Modules
+
+Statistiques
+
+Permissions
+
+=========================================================
+QUALITE
+=========================================================
+
+Le Dashboard SuperAdmin doit être totalement indépendant des Dashboards des entreprises.
+
+Le code doit permettre d'ajouter ultérieurement :
+
+- gestion des abonnements ;
+- facturation des entreprises ;
+- paiements ;
+- audit global de la plateforme ;
+- monitoring ;
+- notifications globales.
