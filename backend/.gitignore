@@ -18,7 +18,9 @@ out/
 *.db
 *.db-shm
 *.db-wal
-backups/
+# Chemin precis (et non "backups/" generique) pour ne pas matcher, en
+# case-insensitive sous Windows, le dossier de code source CashApp.Application/Backups/
+src/CashApp.Api/backups/
 
 ## Logs
 *.log
