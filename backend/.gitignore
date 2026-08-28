@@ -22,5 +22,10 @@ out/
 # case-insensitive sous Windows, le dossier de code source CashApp.Application/Backups/
 src/CashApp.Api/backups/
 
+## Fichiers generes/uploades a l'execution
+src/CashApp.Api/exports/
+src/CashApp.Api/imports/
+src/CashApp.Api/attachments/
+
 ## Logs
 *.log
