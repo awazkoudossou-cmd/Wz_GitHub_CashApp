@@ -336,7 +336,7 @@ public class ExportService : IExportService
             {
                 page.Size(PageSizes.A4.Landscape());
                 page.Margin(20);
-                page.DefaultTextStyle(x => x.FontSize(9));
+                page.DefaultTextStyle(x => x.FontSize(9).FontFamily(PdfFonts.Inter));
 
                 page.Header().Column(col =>
                 {
@@ -463,7 +463,7 @@ public class ExportService : IExportService
             {
                 page.Size(PageSizes.A4.Landscape());
                 page.Margin(20);
-                page.DefaultTextStyle(x => x.FontSize(9));
+                page.DefaultTextStyle(x => x.FontSize(9).FontFamily(PdfFonts.Inter));
                 page.Header().Text("Sessions de caisse").FontSize(14).Bold();
 
                 page.Content().Table(table =>
@@ -523,7 +523,7 @@ public class ExportService : IExportService
             {
                 page.Size(PageSizes.A4);
                 page.Margin(25);
-                page.DefaultTextStyle(x => x.FontSize(10));
+                page.DefaultTextStyle(x => x.FontSize(10).FontFamily(PdfFonts.Inter));
 
                 page.Header().Column(col =>
                 {
@@ -620,7 +620,7 @@ public class ExportService : IExportService
                 page.Margin(12);
                 // Police adaptée : plus petite si 2 copies sur la même page.
                 var baseFontSize = copies == 2 ? 7.5f : 10f;
-                page.DefaultTextStyle(x => x.FontSize(baseFontSize));
+                page.DefaultTextStyle(x => x.FontSize(baseFontSize).FontFamily(PdfFonts.Inter));
 
                 page.Content().Column(col =>
                 {
@@ -746,7 +746,7 @@ public class ExportService : IExportService
             {
                 page.Size(PageSizes.A4);
                 page.Margin(25);
-                page.DefaultTextStyle(x => x.FontSize(10));
+                page.DefaultTextStyle(x => x.FontSize(10).FontFamily(PdfFonts.Inter));
 
                 page.Header().Column(col =>
                 {

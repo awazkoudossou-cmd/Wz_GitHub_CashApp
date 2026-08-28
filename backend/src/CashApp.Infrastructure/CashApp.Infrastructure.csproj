@@ -29,4 +29,10 @@
     <ProjectReference Include="..\CashApp.Shared\CashApp.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Fonts\Inter-Regular.ttf" />
+    <EmbeddedResource Include="Fonts\Inter-Bold.ttf" />
+    <EmbeddedResource Include="Fonts\Inter-Italic.ttf" />
+  </ItemGroup>
+
 </Project>

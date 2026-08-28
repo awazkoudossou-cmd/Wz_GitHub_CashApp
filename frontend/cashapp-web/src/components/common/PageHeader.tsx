@@ -9,7 +9,13 @@ interface Props {
 
 export function PageHeader({ title, subtitle, actions }: Props) {
   return (
-    <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+    <Stack
+      direction={{ xs: 'column', sm: 'row' }}
+      justifyContent="space-between"
+      alignItems={{ xs: 'stretch', sm: 'center' }}
+      spacing={{ xs: 1.5, sm: 0 }}
+      mb={3}
+    >
       <Box>
         <Typography variant="h5">{title}</Typography>
         {subtitle && (
@@ -18,7 +24,11 @@ export function PageHeader({ title, subtitle, actions }: Props) {
           </Typography>
         )}
       </Box>
-      {actions}
+      {actions && (
+        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          {actions}
+        </Stack>
+      )}
     </Stack>
   );
 }
