@@ -3,6 +3,7 @@ using CashApp.Domain.Common;
 using CashApp.Domain.Entities;
 using CashApp.Domain.Entities.V2;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CashApp.Infrastructure.Persistence;
 
@@ -77,6 +78,31 @@ public class AppDbContext : DbContext, IAppDbContext
                 if (property.GetCollation() == "NOCASE")
                 {
                     property.SetCollation(null);
+                }
+            }
+
+            // SQLite ignore le DateTimeKind (Unspecified/Local/Utc) et stocke tel quel ;
+            // Postgres ("timestamp with time zone") exige explicitement Kind=Utc et rejette
+            // toute valeur Unspecified/Local avec une ArgumentException. Beaucoup de dates de
+            // l'app (ex: date saisie sur une opération) arrivent en Unspecified. On force donc
+            // Kind=Utc à l'écriture comme à la lecture pour tous les DateTime/DateTime? du modèle,
+            // sans changer l'instant représenté (aucune conversion de fuseau, juste le tag Kind).
+            var utcConverter = new ValueConverter<DateTime, DateTime>(
+                v => v.Kind == DateTimeKind.Utc ? v : DateTime.SpecifyKind(v, DateTimeKind.Utc),
+                v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+            var nullableUtcConverter = new ValueConverter<DateTime?, DateTime?>(
+                v => v.HasValue && v.Value.Kind != DateTimeKind.Utc ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v,
+                v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v);
+
+            foreach (var property in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetProperties()))
+            {
+                if (property.ClrType == typeof(DateTime))
+                {
+                    property.SetValueConverter(utcConverter);
+                }
+                else if (property.ClrType == typeof(DateTime?))
+                {
+                    property.SetValueConverter(nullableUtcConverter);
                 }
             }
         }
