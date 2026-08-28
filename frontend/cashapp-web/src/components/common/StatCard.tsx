@@ -5,7 +5,7 @@ interface Props {
   label: string;
   value: ReactNode;
   hint?: string;
-  color?: 'primary' | 'success' | 'warning' | 'error' | 'text.primary';
+  color?: 'primary' | 'success' | 'warning' | 'error' | 'info' | 'text.primary';
 }
 
 export function StatCard({ label, value, hint, color = 'text.primary' }: Props) {

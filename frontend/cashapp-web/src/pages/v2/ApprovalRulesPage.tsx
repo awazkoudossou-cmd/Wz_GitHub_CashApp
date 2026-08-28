@@ -26,7 +26,7 @@ import {
   useUpdateApprovalRuleStatus
 } from '@/modules/approvals/hooks';
 import { ApprovalTargetType } from '@/types/v2Enums';
-import { RoleCodes } from '@/types/enums';
+import { RoleCodes, type RoleCode } from '@/types/enums';
 import { extractErrorMessage } from '@/api/client';
 import type { ApprovalRule } from '@/types';
 import { formatCurrency } from '@/utils/format';
@@ -144,7 +144,7 @@ function RuleDialog({ editing, loading, error, onClose, onSubmit }: RuleDialogPr
   const [targetType, setTargetType] = useState<keyof typeof ApprovalTargetType>('CASH_OPERATION');
   const [amountThreshold, setAmountThreshold] = useState<string>('100000');
   const [currencyCode, setCurrencyCode] = useState('XOF');
-  const [requiredApproverRole, setRole] = useState(RoleCodes.SUPERVISOR);
+  const [requiredApproverRole, setRole] = useState<RoleCode>(RoleCodes.SUPERVISOR);
   const [isBlocking, setBlocking] = useState(true);
 
   useEffect(() => {
@@ -157,7 +157,7 @@ function RuleDialog({ editing, loading, error, onClose, onSubmit }: RuleDialogPr
       setTargetType(r.targetType as keyof typeof ApprovalTargetType);
       setAmountThreshold(r.amountThreshold == null ? '' : String(r.amountThreshold));
       setCurrencyCode(r.currencyCode ?? '');
-      setRole(r.requiredApproverRole);
+      setRole(r.requiredApproverRole as RoleCode);
       setBlocking(r.isBlocking);
     } else {
       setCode('');
@@ -195,7 +195,7 @@ function RuleDialog({ editing, loading, error, onClose, onSubmit }: RuleDialogPr
           </Grid>
           <Grid item xs={6}>
             <TextField select size="small" fullWidth label="Rôle approbateur" value={requiredApproverRole}
-              onChange={(e) => setRole(e.target.value)}>
+              onChange={(e) => setRole(e.target.value as RoleCode)}>
               <MenuItem value={RoleCodes.ADMIN}>ADMIN</MenuItem>
               <MenuItem value={RoleCodes.SUPERVISOR}>SUPERVISOR</MenuItem>
             </TextField>
