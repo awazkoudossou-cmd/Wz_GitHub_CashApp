@@ -65,6 +65,21 @@ public class AppDbContext : DbContext, IAppDbContext
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+        // "NOCASE" est une collation propre à SQLite (comparaison insensible à la casse
+        // sur ThirdParty/CategoryGroup.Name) ; Postgres n'en dispose pas nativement et
+        // rejette la création de table avec cette collation. On la retire donc hors SQLite
+        // (comparaison/unicité redeviennent sensibles à la casse sur Postgres).
+        if (!Database.IsSqlite())
+        {
+            foreach (var property in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetProperties()))
+            {
+                if (property.GetCollation() == "NOCASE")
+                {
+                    property.SetCollation(null);
+                }
+            }
+        }
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
