@@ -118,7 +118,7 @@ const CONFIGURATION: NavEntry[] = [
   { label: 'Modules', to: '/settings/features', icon: <ExtensionIcon />, feature: FeatureCodes.CORE_SETTINGS, roles: [RoleCodes.ADMIN] }
 ];
 
-function NavItem({ entry, collapsed }: { entry: NavEntry; collapsed: boolean }) {
+function NavItem({ entry, collapsed, onNavigate }: { entry: NavEntry; collapsed: boolean; onNavigate?: () => void }) {
   const featureOk = useIsFeatureEnabled(entry.feature ?? '__none__') || !entry.feature;
   const roleOk = useIsInAnyRole(entry.roles ?? []) || !entry.roles?.length;
   if (!featureOk || !roleOk) return null;
@@ -127,6 +127,7 @@ function NavItem({ entry, collapsed }: { entry: NavEntry; collapsed: boolean }) 
     <ListItemButton
       component={NavLink}
       to={entry.to}
+      onClick={onNavigate}
       sx={{
         minHeight: 44,
         justifyContent: collapsed ? 'center' : 'flex-start',
@@ -153,9 +154,10 @@ interface SectionProps {
   title: string;
   entries: NavEntry[];
   sidebarCollapsed: boolean;
+  onNavigate?: () => void;
 }
 
-function Section({ id, title, entries, sidebarCollapsed }: SectionProps) {
+function Section({ id, title, entries, sidebarCollapsed, onNavigate }: SectionProps) {
   const features = useFeatures();
   const userRole = useAuthStore((s) => s.user?.roleCode);
   const collapsedSections = useThemeStore((s) => s.collapsedSections);
@@ -174,7 +176,7 @@ function Section({ id, title, entries, sidebarCollapsed }: SectionProps) {
   if (sidebarCollapsed) {
     return (
       <List dense disablePadding>
-        {visibleEntries.map((e) => <NavItem key={e.to} entry={e} collapsed={true} />)}
+        {visibleEntries.map((e) => <NavItem key={e.to} entry={e} collapsed={true} onNavigate={onNavigate} />)}
       </List>
     );
   }
@@ -198,55 +200,89 @@ function Section({ id, title, entries, sidebarCollapsed }: SectionProps) {
       </ListItemButton>
       <Collapse in={!isCollapsed} timeout="auto" unmountOnExit>
         <List dense disablePadding>
-          {visibleEntries.map((e) => <NavItem key={e.to} entry={e} collapsed={false} />)}
+          {visibleEntries.map((e) => <NavItem key={e.to} entry={e} collapsed={false} onNavigate={onNavigate} />)}
         </List>
       </Collapse>
     </Box>
   );
 }
 
-export function Sidebar() {
+interface SidebarProps {
+  mobileOpen: boolean;
+  onMobileClose: () => void;
+}
+
+function DrawerContent({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
+  return (
+    <>
+      {/* Tableau de bord — entrée seule sans groupe */}
+      <List disablePadding>
+        <NavItem entry={DASHBOARD} collapsed={collapsed} onNavigate={onNavigate} />
+      </List>
+      <Divider />
+
+      <Section id="caisse"         title="Caisse"         entries={CAISSE}         sidebarCollapsed={collapsed} onNavigate={onNavigate} />
+      <Section id="administration" title="Administration" entries={ADMINISTRATION} sidebarCollapsed={collapsed} onNavigate={onNavigate} />
+      <Section id="avance"         title="Avancé"         entries={AVANCE}         sidebarCollapsed={collapsed} onNavigate={onNavigate} />
+      <Section id="comptabilite"   title="Comptabilité"   entries={COMPTABILITE}   sidebarCollapsed={collapsed} onNavigate={onNavigate} />
+      <Section id="configuration"  title="Configuration"  entries={CONFIGURATION}  sidebarCollapsed={collapsed} onNavigate={onNavigate} />
+    </>
+  );
+}
+
+export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const collapsed = useThemeStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useThemeStore((s) => s.toggleSidebar);
   const width = collapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH_EXPANDED;
 
   return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        width,
-        flexShrink: 0,
-        whiteSpace: 'nowrap',
-        '& .MuiDrawer-paper': {
+    <>
+      {/* Mobile : tiroir en superposition, toujours pleine largeur, se ferme après un clic */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={onMobileClose}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': { width: DRAWER_WIDTH_EXPANDED, boxSizing: 'border-box' }
+        }}
+      >
+        <Toolbar sx={{ px: 2, justifyContent: 'space-between', minHeight: 64 }}>
+          <Typography variant="h6" color="primary">CashApp</Typography>
+        </Toolbar>
+        <Divider />
+        <DrawerContent collapsed={false} onNavigate={onMobileClose} />
+      </Drawer>
+
+      {/* Desktop : tiroir permanent, largeur repliable */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          display: { xs: 'none', md: 'block' },
           width,
-          boxSizing: 'border-box',
-          borderRight: '1px solid',
-          borderColor: 'divider',
-          overflowX: 'hidden',
-          transition: 'width 200ms ease'
-        }
-      }}
-    >
-      <Toolbar sx={{ px: collapsed ? 1 : 2, justifyContent: 'space-between', minHeight: 64 }}>
-        {!collapsed && <Typography variant="h6" color="primary">CashApp</Typography>}
-        <IconButton size="small" onClick={toggleSidebar} aria-label={collapsed ? 'Déplier' : 'Réduire'}>
-          {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-        </IconButton>
-      </Toolbar>
-      <Divider />
-
-      {/* Tableau de bord — entrée seule sans groupe */}
-      <List disablePadding>
-        <NavItem entry={DASHBOARD} collapsed={collapsed} />
-      </List>
-      <Divider />
-
-      <Section id="caisse"         title="Caisse"         entries={CAISSE}         sidebarCollapsed={collapsed} />
-      <Section id="administration" title="Administration" entries={ADMINISTRATION} sidebarCollapsed={collapsed} />
-      <Section id="avance"         title="Avancé"         entries={AVANCE}         sidebarCollapsed={collapsed} />
-      <Section id="comptabilite"   title="Comptabilité"   entries={COMPTABILITE}   sidebarCollapsed={collapsed} />
-      <Section id="configuration"  title="Configuration"  entries={CONFIGURATION}  sidebarCollapsed={collapsed} />
-    </Drawer>
+          flexShrink: 0,
+          whiteSpace: 'nowrap',
+          '& .MuiDrawer-paper': {
+            width,
+            boxSizing: 'border-box',
+            borderRight: '1px solid',
+            borderColor: 'divider',
+            overflowX: 'hidden',
+            transition: 'width 200ms ease'
+          }
+        }}
+      >
+        <Toolbar sx={{ px: collapsed ? 1 : 2, justifyContent: 'space-between', minHeight: 64 }}>
+          {!collapsed && <Typography variant="h6" color="primary">CashApp</Typography>}
+          <IconButton size="small" onClick={toggleSidebar} aria-label={collapsed ? 'Déplier' : 'Réduire'}>
+            {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+          </IconButton>
+        </Toolbar>
+        <Divider />
+        <DrawerContent collapsed={collapsed} />
+      </Drawer>
+    </>
   );
 }
 

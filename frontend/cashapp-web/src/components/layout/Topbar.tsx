@@ -2,11 +2,12 @@ import { AppBar, Box, Button, IconButton, MenuItem, Stack, TextField, Toolbar, T
 import LogoutIcon from '@mui/icons-material/Logout';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useAuthStore } from '@/app/store/authStore';
 import { useThemeStore } from '@/app/store/themeStore';
 import { useLogout } from '@/hooks/useAuth';
 
-export function Topbar() {
+export function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
   const user = useAuthStore((s) => s.user);
   const cashRegisters = useAuthStore((s) => s.cashRegisters);
   const selectedId = useAuthStore((s) => s.selectedCashRegisterId);
@@ -18,12 +19,21 @@ export function Topbar() {
   return (
     <AppBar position="sticky" color="default" sx={{ bgcolor: 'background.paper' }}>
       <Toolbar>
-        <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="body2" color="text.secondary">
+        <IconButton
+          onClick={onMenuClick}
+          color="inherit"
+          aria-label="Ouvrir le menu"
+          sx={{ display: { xs: 'inline-flex', md: 'none' }, mr: 1 }}
+        >
+          <MenuIcon />
+        </IconButton>
+        <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}>
+          <Typography variant="body2" color="text.secondary" noWrap>
             Connecté en tant que <b>{user?.fullName}</b> ({user?.roleCode})
           </Typography>
         </Box>
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Box sx={{ flexGrow: 1, display: { xs: 'block', sm: 'none' } }} />
+        <Stack direction="row" spacing={{ xs: 1, sm: 2 }} alignItems="center">
           {cashRegisters.length > 0 && (
             <TextField
               select
@@ -31,7 +41,7 @@ export function Topbar() {
               label="Caisse"
               value={selectedId ?? ''}
               onChange={(e) => setSelected(e.target.value ? Number(e.target.value) : null)}
-              sx={{ minWidth: 180 }}
+              sx={{ minWidth: { xs: 110, sm: 180 } }}
             >
               {cashRegisters.map((c) => (
                 <MenuItem key={c.id} value={c.id}>
@@ -45,8 +55,13 @@ export function Topbar() {
               {themeMode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
             </IconButton>
           </Tooltip>
-          <Button color="inherit" startIcon={<LogoutIcon />} onClick={logout}>
-            Déconnexion
+          <Button
+            color="inherit"
+            startIcon={<LogoutIcon />}
+            onClick={logout}
+            sx={{ minWidth: 0, px: { xs: 1, sm: 2 }, '& .MuiButton-startIcon': { mr: { xs: 0, sm: 1 } } }}
+          >
+            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Déconnexion</Box>
           </Button>
         </Stack>
       </Toolbar>
