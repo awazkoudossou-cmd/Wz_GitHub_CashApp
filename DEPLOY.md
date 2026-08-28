@@ -60,8 +60,9 @@ publique.
 - Le plan **free** de Render met les services en veille après 15 min d'inactivité
   (le premier chargement après une pause peut prendre ~30-60s le temps que le
   conteneur redémarre). Passe sur un plan payant pour éviter ça en production réelle.
-- La base PostgreSQL du plan free expire après 90 jours sans upgrade — pense à
-  surveiller ça si tu restes en gratuit.
+- La base PostgreSQL du plan free expire **30 jours** après sa création si tu ne
+  passes pas sur une instance payante (à partir de 6 $/mois pour la plus petite,
+  Basic-256mb) — pense à surveiller ça si tu restes en gratuit.
 - Le backend détecte automatiquement PostgreSQL vs SQLite selon le format de la
   chaîne de connexion (`Host=...` ou `postgres://...` → PostgreSQL ; `Data Source=...`
   → SQLite). Le développement local avec `start-backend.ps1` continue donc à utiliser
