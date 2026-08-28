@@ -28,11 +28,11 @@ export const lightTheme: Theme = createTheme({
     MuiAppBar: { styleOverrides: { root: { boxShadow: 'none', borderBottom: '1px solid rgba(0,0,0,0.06)' } } },
     MuiCssBaseline: {
       styleOverrides: {
-        '*': { scrollbarWidth: 'thin', scrollbarColor: 'rgba(15,23,42,0.18) transparent' },
+        '*': { scrollbarWidth: 'thin', scrollbarColor: 'rgba(15,23,42,0.08) transparent' },
         '*::-webkit-scrollbar': { width: 8, height: 8 },
         '*::-webkit-scrollbar-track': { background: 'transparent' },
-        '*::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(15,23,42,0.18)', borderRadius: 8 },
-        '*::-webkit-scrollbar-thumb:hover': { backgroundColor: 'rgba(15,23,42,0.32)' }
+        '*::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(15,23,42,0.08)', borderRadius: 8 },
+        '*::-webkit-scrollbar-thumb:hover': { backgroundColor: 'rgba(15,23,42,0.2)' }
       }
     }
   }
@@ -56,11 +56,11 @@ export const darkTheme: Theme = createTheme({
     MuiAppBar: { styleOverrides: { root: { boxShadow: 'none', borderBottom: '1px solid rgba(255,255,255,0.08)', backgroundImage: 'none' } } },
     MuiCssBaseline: {
       styleOverrides: {
-        '*': { scrollbarWidth: 'thin', scrollbarColor: 'rgba(148,163,184,0.25) transparent' },
+        '*': { scrollbarWidth: 'thin', scrollbarColor: 'rgba(148,163,184,0.12) transparent' },
         '*::-webkit-scrollbar': { width: 8, height: 8 },
         '*::-webkit-scrollbar-track': { background: 'transparent' },
-        '*::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(148,163,184,0.25)', borderRadius: 8 },
-        '*::-webkit-scrollbar-thumb:hover': { backgroundColor: 'rgba(148,163,184,0.4)' }
+        '*::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(148,163,184,0.12)', borderRadius: 8 },
+        '*::-webkit-scrollbar-thumb:hover': { backgroundColor: 'rgba(148,163,184,0.25)' }
       }
     }
   }

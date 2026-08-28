@@ -1,0 +1,42 @@
+databases:
+  - name: cashapp-db
+    plan: free
+    databaseName: cashapp
+    user: cashapp
+
+services:
+  - type: web
+    name: cashapp-api
+    runtime: docker
+    dockerfilePath: ./backend/src/CashApp.Api/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__Default
+        fromDatabase:
+          name: cashapp-db
+          property: connectionString
+      - key: Jwt__SigningKey
+        generateValue: true
+      # A completer manuellement dans le dashboard Render une fois l'URL du site
+      # statique connue (ex: https://cashapp-web.onrender.com) - voir DEPLOY.md.
+      - key: Cors__AllowedOrigins__0
+        value: https://REMPLACER-PAR-URL-FRONTEND.onrender.com
+
+  - type: web
+    name: cashapp-web
+    runtime: static
+    rootDir: frontend/cashapp-web
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      # A completer manuellement une fois l'URL du service API connue
+      # (ex: https://cashapp-api.onrender.com) - voir DEPLOY.md.
+      - key: VITE_API_BASE_URL
+        value: https://REMPLACER-PAR-URL-BACKEND.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

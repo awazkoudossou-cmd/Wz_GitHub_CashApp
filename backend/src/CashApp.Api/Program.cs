@@ -10,10 +10,28 @@ using CashApp.Infrastructure.Persistence.Seed;
 using CashApp.Infrastructure.Security;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// --- Port dynamique (Render/Heroku fournissent PORT ; fallback 5080 en local) ---
+var port = Environment.GetEnvironmentVariable("PORT");
+var isBehindProxy = !string.IsNullOrWhiteSpace(port);
+if (isBehindProxy)
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
+
+// Render (et la plupart des PaaS) terminent le TLS sur leur proxy et relaient en HTTP :
+// sans ça, UseHttpsRedirection() ci-dessous provoquerait une boucle de redirection infinie.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 // --- Configuration ---
 var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
@@ -56,10 +74,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
-// --- CORS dev ---
+// --- CORS ---
+// Origines par défaut (dev local) + origines supplémentaires via la variable d'env/config
+// "Cors__AllowedOrigins__0", "Cors__AllowedOrigins__1", ... (ex: l'URL du frontend Vercel en prod).
 const string DevCors = "DevCors";
+var configuredOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+var corsOrigins = new[] { "http://localhost:5173", "http://localhost:3000" }
+    .Concat(configuredOrigins)
+    .Distinct()
+    .ToArray();
 builder.Services.AddCors(o => o.AddPolicy(DevCors, p =>
-    p.WithOrigins("http://localhost:5173", "http://localhost:3000")
+    p.WithOrigins(corsOrigins)
      .AllowAnyHeader()
      .AllowAnyMethod()
      .AllowCredentials()));
@@ -95,6 +120,12 @@ using (var scope = app.Services.CreateScope())
 
     // Migrations légères ad-hoc : ajout de colonnes V2-A si elles n'existent pas.
     // SQLite ne supporte pas "ADD COLUMN IF NOT EXISTS" → on tente et on ignore l'erreur.
+    // Ce bloc est écrit en dialecte SQLite et n'a de sens que pour faire évoluer une base
+    // SQLite locale déjà créée avant l'ajout de ces colonnes au modèle EF. Sur Postgres,
+    // EnsureCreatedAsync ci-dessus crée déjà le schéma complet et à jour depuis le modèle EF :
+    // ce bloc est donc sauté (sa syntaxe SQLite ferait de toute façon échouer chaque requête).
+    if (db.Database.IsSqlite())
+    {
     static async Task TryExec(AppDbContext db, string sql)
     {
         try { await db.Database.ExecuteSqlRawAsync(sql); } catch { /* déjà appliquée */ }
@@ -263,6 +294,7 @@ using (var scope = app.Services.CreateScope())
     await TryExec(db, "ALTER TABLE accounting_settings ADD COLUMN CashJournalRootCode TEXT NULL;");
     await TryExec(db, "ALTER TABLE accounting_settings ADD COLUMN LastCashAccountSequence INTEGER NOT NULL DEFAULT 0;");
     await TryExec(db, "ALTER TABLE accounting_settings ADD COLUMN LastCashJournalSequence INTEGER NOT NULL DEFAULT 0;");
+    }
 
     await DbSeeder.SeedAsync(db, hasher);
 }
@@ -274,7 +306,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<ExceptionMiddleware>();
-app.UseHttpsRedirection();
+app.UseForwardedHeaders();
+if (!isBehindProxy)
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors(DevCors);
 app.UseAuthentication();
 app.UseAuthorization();
